@@ -1,11 +1,21 @@
+use std::collections::HashMap;
+use std::sync::Arc;
+
 use crate::commands::team::Team;
+use serde::{Deserialize, Serialize};
+use serenity::framework::standard::macros::command;
+use serenity::framework::standard::CommandResult;
+use serenity::model::prelude::Channel::Guild;
+use serenity::model::prelude::MessageId;
+use serenity::prelude::{RwLock, TypeMapKey};
 use serenity::{
+    framework::standard::Args,
     model::prelude::{GuildChannel, Message},
     prelude::Context,
     utils::MessageBuilder,
 };
 
-#[derive(Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Event {
     title: String,
     description: String,
@@ -55,4 +65,60 @@ impl EventBuilder {
     }
 }
 
-impl Event {}
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct Events(HashMap<MessageId, Event>);
+
+pub async fn add_event(ctx: &Context, event: Event) {
+    let events_lock = {
+        let data_read = ctx.data.read().await;
+        data_read
+            .get::<EventsContainer>()
+            .expect("Expected EventsCounter in data.")
+            .clone()
+    };
+
+    {
+        let mut events = events_lock.write().await;
+        let message_id = event.message.id;
+        events.0.insert(message_id, event);
+    }
+}
+
+impl Default for Events {
+    fn default() -> Self {
+        Events(HashMap::new())
+    }
+}
+
+pub struct EventsContainer;
+impl TypeMapKey for EventsContainer {
+    type Value = Arc<RwLock<Events>>;
+}
+
+#[command]
+pub async fn create_event(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+    let Ok(title) = args.single::<String>() else {
+            msg.reply(ctx, "Please enter a valid title.").await?;
+            return Ok(());
+        };
+    let Ok(description) = args.single::<String>() else {
+            msg.reply(ctx, "Please enter a valid description.").await?;
+            return Ok(());
+        };
+    let Ok(Guild(channel)) = msg.channel(ctx).await else {
+            msg.reply(ctx, "An error occured.").await?;
+            return Ok(());
+        };
+    let Some(event) = EventBuilder::new()
+        .title(title)
+        .description(description)
+        .build_and_send(ctx, channel)
+        .await else {
+            msg.reply(ctx, "An error occured.").await?;
+            return Ok(());
+        };
+
+    add_event(ctx, event).await;
+
+    Ok(())
+}

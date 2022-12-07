@@ -1,15 +1,16 @@
 mod commands;
 
 use std::env;
+use std::sync::Arc;
 
+use crate::commands::event::EventsContainer;
+use crate::commands::event::CREATE_EVENT_COMMAND;
+use commands::event::Events;
 use serenity::async_trait;
-use serenity::framework::standard::macros::{command, group};
-use serenity::framework::standard::{Args, CommandResult, StandardFramework};
-use serenity::model::channel::Message;
-use serenity::model::prelude::Channel::Guild;
+use serenity::framework::standard::macros::group;
+use serenity::framework::standard::StandardFramework;
+use serenity::model::prelude::Message;
 use serenity::prelude::*;
-
-use crate::commands::event::EventBuilder;
 
 #[group]
 #[commands(create_event)]
@@ -18,7 +19,18 @@ struct General;
 struct Handler;
 
 #[async_trait]
-impl EventHandler for Handler {}
+impl EventHandler for Handler {
+    async fn message(&self, ctx: Context, _msg: Message) {
+        let data_read = ctx.data.read().await;
+        let events = {
+            data_read
+                .get::<EventsContainer>()
+                .expect("Expected EventsCounter in data.")
+                .clone()
+        };
+        println!("{:?}", events);
+    }
+}
 
 #[tokio::main]
 async fn main() {
@@ -35,31 +47,14 @@ async fn main() {
         .await
         .expect("Error creating client");
 
+    // Where the data is kept.
+    {
+        let mut data = client.data.write().await;
+        data.insert::<EventsContainer>(Arc::new(RwLock::new(Events::default())));
+    }
+
     // start listening for events by starting a single shard
     if let Err(why) = client.start().await {
         println!("An error occurred while running the client: {:?}", why);
     }
-}
-
-#[command]
-async fn create_event(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
-    let Ok(title) = args.single::<String>() else {
-        msg.reply(ctx, "Please enter a valid title.").await?;
-        return Ok(());
-    };
-    let Ok(description) = args.single::<String>() else {
-        msg.reply(ctx, "Please enter a valid description.").await?;
-        return Ok(());
-    };
-    let Ok(Guild(channel)) = msg.channel(ctx).await else {
-        msg.reply(ctx, "An error occured.").await?;
-        return Ok(());
-    };
-    let event = EventBuilder::new()
-        .title(title)
-        .description(description)
-        .build_and_send(ctx, channel)
-        .await;
-
-    Ok(())
 }
