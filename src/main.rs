@@ -1,16 +1,14 @@
 mod commands;
 
-use std::env;
-use std::sync::Arc;
+use commands::event::{Events, EventsContainer, CREATE_EVENT_COMMAND, PATH};
+use std::{env, fs, sync::Arc};
 
-use crate::commands::event::EventsContainer;
-use crate::commands::event::CREATE_EVENT_COMMAND;
-use commands::event::Events;
-use serenity::async_trait;
-use serenity::framework::standard::macros::group;
-use serenity::framework::standard::StandardFramework;
-use serenity::model::prelude::Message;
-use serenity::prelude::*;
+use serenity::{
+    async_trait,
+    framework::standard::{macros::group, StandardFramework},
+    model::prelude::*,
+    prelude::*,
+};
 
 #[group]
 #[commands(create_event)]
@@ -20,22 +18,16 @@ struct Handler;
 
 #[async_trait]
 impl EventHandler for Handler {
-    async fn message(&self, ctx: Context, _msg: Message) {
-        let data_read = ctx.data.read().await;
-        let events = {
-            data_read
-                .get::<EventsContainer>()
-                .expect("Expected EventsCounter in data.")
-                .clone()
-        };
-        println!("{:?}", events);
+    async fn message_delete(&self, ctx: Context, _: ChannelId, id: MessageId, _: Option<GuildId>) {
+        // Will try to delete if it exists in the memory.
+        Events::delete_with_id(&ctx, id).await;
     }
 }
 
 #[tokio::main]
 async fn main() {
     let framework = StandardFramework::new()
-        .configure(|c| c.prefix("/")) // set the bot's prefix to "~"
+        .configure(|c| c.prefix(";")) // set the bot's prefix to ";"
         .group(&GENERAL_GROUP);
 
     // Login with a bot token from the environment
@@ -47,13 +39,19 @@ async fn main() {
         .await
         .expect("Error creating client");
 
-    // Where the data is kept.
+    // Initialize the Arc RwLock which keep the data.
     {
         let mut data = client.data.write().await;
-        data.insert::<EventsContainer>(Arc::new(RwLock::new(Events::default())));
+        let saved_data = match fs::read_to_string(PATH) {
+            Err(_) => Events::default(),
+            Ok(file_content) => {
+                serde_json::from_str(&file_content).expect("File is probably corrupted.")
+            }
+        };
+        data.insert::<EventsContainer>(Arc::new(RwLock::new(saved_data)));
     }
 
-    // start listening for events by starting a single shard
+    // Start listening for events by starting a single shard
     if let Err(why) = client.start().await {
         println!("An error occurred while running the client: {:?}", why);
     }
