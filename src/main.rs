@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 mod commands;
 
 use commands::event::{Events, EventsContainer, PATH};

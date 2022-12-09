@@ -74,7 +74,7 @@ impl Event {
             .build();
         match self.msg.edit(ctx, |m| m.content(msg.clone())).await {
             Ok(_) => self.msg.content = msg,
-            Err(why) => match CHANNEL_ID.say(&ctx.http, &msg).await {
+            Err(_) => match CHANNEL_ID.say(&ctx.http, &msg).await {
                 Ok(message) => self.msg = message,
                 Err(why) => {
                     println!("Error creating message: {:?}", why);
