@@ -1,6 +1,6 @@
 mod commands;
 
-use commands::event::{Events, EventsContainer, CREATE_EVENT_COMMAND, PATH};
+use commands::event::{Events, EventsContainer, PATH};
 use std::{env, fs, sync::Arc};
 
 use serenity::{
@@ -11,16 +11,21 @@ use serenity::{
 };
 
 #[group]
-#[commands(create_event)]
+// #[commands()]
 struct General;
 
 struct Handler;
 
 #[async_trait]
 impl EventHandler for Handler {
-    async fn message_delete(&self, ctx: Context, _: ChannelId, id: MessageId, _: Option<GuildId>) {
-        // Will try to delete if it exists in the memory.
-        Events::delete_with_id(&ctx, id).await;
+    async fn guild_scheduled_event_create(&self, ctx: Context, scheduled_event: ScheduledEvent) {
+        Events::add(&ctx, scheduled_event).await;
+    }
+    async fn guild_scheduled_event_delete(&self, ctx: Context, scheduled_event: ScheduledEvent) {
+        Events::delete(&ctx, scheduled_event).await;
+    }
+    async fn guild_scheduled_event_update(&self, ctx: Context, scheduled_event: ScheduledEvent) {
+        Events::update(&ctx, scheduled_event).await;
     }
 }
 
