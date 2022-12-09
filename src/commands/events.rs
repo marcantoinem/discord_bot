@@ -2,87 +2,19 @@ use std::collections::HashMap;
 use std::fs;
 use std::sync::Arc;
 
-use crate::commands::team::Team;
+use crate::commands::event::event::{Event, EventBuilder, CHANNEL_ID};
 use serde::{Deserialize, Serialize};
 use serenity::{
     // framework::standard::CommandResult,
     // framework::standard::{macros::command, Args, CommandResult},
     model::prelude::*,
     prelude::*,
-    utils::MessageBuilder,
 };
 
-const CHANNEL_ID: ChannelId = ChannelId(1050254533537845288);
 pub const PATH: &str = "./saved_data.json";
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct Event {
-    teams: Vec<Team>,
-    event: ScheduledEvent,
-    msg: Message,
-}
-
-pub struct EventBuilder {
-    teams: Vec<Team>,
-    event: Option<ScheduledEvent>,
-}
-
-impl EventBuilder {
-    pub fn new() -> EventBuilder {
-        EventBuilder {
-            teams: vec![Team::default()],
-            event: None,
-        }
-    }
-    pub fn event(mut self, event: ScheduledEvent) -> EventBuilder {
-        self.event = Some(event);
-        self
-    }
-    pub async fn build_and_send(self, ctx: &Context, channel: ChannelId) -> Option<Event> {
-        let event = self.event.unwrap();
-        let msg = MessageBuilder::new()
-            .push_bold_line(&event.name.clone())
-            .push_line(&event.clone().description.unwrap_or(String::from("")))
-            .build();
-        match channel.say(&ctx.http, &msg).await {
-            Ok(message) => Some(Event {
-                teams: self.teams,
-                event: event.clone(),
-                msg: message,
-            }),
-            Err(why) => {
-                println!("Error creating message: {:?}", why);
-                None
-            }
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Events(HashMap<ScheduledEventId, Event>);
-
-impl Event {
-    pub async fn update(&mut self, ctx: &Context, scheduled_event: ScheduledEvent) {
-        let title = scheduled_event.name.clone();
-        let description = scheduled_event
-            .description
-            .clone()
-            .unwrap_or(String::from(""));
-        let msg = MessageBuilder::new()
-            .push_bold_line(title)
-            .push_line(description)
-            .build();
-        match self.msg.edit(ctx, |m| m.content(msg.clone())).await {
-            Ok(_) => self.msg.content = msg,
-            Err(_) => match CHANNEL_ID.say(&ctx.http, &msg).await {
-                Ok(message) => self.msg = message,
-                Err(why) => {
-                    println!("Error creating message: {:?}", why);
-                }
-            },
-        }
-    }
-}
 
 impl Events {
     pub async fn add(ctx: &Context, scheduled_event: ScheduledEvent) {
@@ -106,7 +38,6 @@ impl Events {
             let serialized_json =
                 serde_json::to_string_pretty(&events.0).expect("Serialization failed.");
             fs::write(PATH, serialized_json).expect("Can't save data.");
-            println!("{:?}", events.0);
         }
     }
     pub async fn delete(ctx: &Context, scheduled_event: ScheduledEvent) {
@@ -129,7 +60,6 @@ impl Events {
             let serialized_json =
                 serde_json::to_string_pretty(&events.0).expect("Serialization failed.");
             fs::write(PATH, serialized_json).expect("Can't save data.");
-            println!("{:?}", events.0);
         }
     }
     pub async fn update(ctx: &Context, scheduled_event: ScheduledEvent) {
@@ -149,7 +79,6 @@ impl Events {
             let serialized_json =
                 serde_json::to_string_pretty(&events.0).expect("Serialization failed.");
             fs::write(PATH, serialized_json).expect("Can't save data.");
-            println!("{:?}", events.0);
         }
     }
 }
