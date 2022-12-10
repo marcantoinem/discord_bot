@@ -1,53 +1,47 @@
-use std::collections::HashMap;
-use std::fs;
-use std::sync::Arc;
+use std::{collections::HashMap, fs, sync::Arc};
 
 use crate::commands::event::event::{Event, EventBuilder, CHANNEL_ID};
 use serde::{Deserialize, Serialize};
-use serenity::{
-    // framework::standard::CommandResult,
-    // framework::standard::{macros::command, Args, CommandResult},
-    model::prelude::*,
-    prelude::*,
-};
+use serenity::framework::standard::{macros::command, CommandResult};
+use serenity::{model::prelude::*, prelude::*};
 
 pub const PATH: &str = "./saved_data.json";
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Events(HashMap<ScheduledEventId, Event>);
 
+pub struct EventsContainer;
+impl TypeMapKey for EventsContainer {
+    type Value = Arc<RwLock<Events>>;
+}
+
 impl Events {
+    async fn get_lock(ctx: &Context) -> Arc<RwLock<Events>> {
+        let data_read = ctx.data.read().await;
+        data_read
+            .get::<EventsContainer>()
+            .expect("Expected EventsCounter in data.")
+            .clone()
+    }
     pub async fn add(ctx: &Context, scheduled_event: ScheduledEvent) {
         let event = EventBuilder::new()
-            .event(scheduled_event)
+            .event(&scheduled_event)
             .build_and_send(&ctx, CHANNEL_ID)
             .await
             .unwrap();
 
-        let events_lock = {
-            let data_read = ctx.data.read().await;
-            data_read
-                .get::<EventsContainer>()
-                .expect("Expected EventsCounter in data.")
-                .clone()
-        };
+        let events_lock = Events::get_lock(ctx).await;
 
         {
             let mut events = events_lock.write().await;
-            events.0.insert(event.event.id, event);
+            events.0.insert(scheduled_event.id, event);
             let serialized_json =
                 serde_json::to_string_pretty(&events.0).expect("Serialization failed.");
             fs::write(PATH, serialized_json).expect("Can't save data.");
         }
     }
     pub async fn delete(ctx: &Context, scheduled_event: ScheduledEvent) {
-        let events_lock = {
-            let data_read = ctx.data.read().await;
-            data_read
-                .get::<EventsContainer>()
-                .expect("Expected EventsCounter in data.")
-                .clone()
-        };
+        let events_lock = Events::get_lock(ctx).await;
 
         {
             let mut events = events_lock.write().await;
@@ -63,22 +57,38 @@ impl Events {
         }
     }
     pub async fn update(ctx: &Context, scheduled_event: ScheduledEvent) {
-        let events_lock = {
-            let data_read = ctx.data.read().await;
-            data_read
-                .get::<EventsContainer>()
-                .expect("Expected EventsCounter in data.")
-                .clone()
-        };
-
+        let events_lock = Events::get_lock(ctx).await;
         {
             let mut events = events_lock.write().await;
-            let mut event = events.0.get(&scheduled_event.id).unwrap().clone();
-            event.update(ctx, scheduled_event).await;
-            events.0.insert(event.event.id, event);
+            if let Some(event) = events.0.get(&scheduled_event.id).clone() {
+                let mut event = event.clone();
+                event.update(ctx, scheduled_event).await;
+                events.0.insert(event.event.id, event);
+            } else {
+                let event = EventBuilder::new()
+                    .event(&scheduled_event)
+                    .build_and_send(&ctx, CHANNEL_ID)
+                    .await
+                    .unwrap();
+                events.0.insert(event.event.id, event);
+            };
             let serialized_json =
                 serde_json::to_string_pretty(&events.0).expect("Serialization failed.");
             fs::write(PATH, serialized_json).expect("Can't save data.");
+        }
+    }
+    pub async fn refresh(ctx: &Context, ready: Ready) {
+        let guilds = ready.guilds.iter();
+        for guild in guilds {
+            let events = ctx
+                .http
+                .get_scheduled_events(*guild.id.as_u64(), false)
+                .await
+                .expect("Cannot get event");
+            println!("{:?}", events);
+            for event in events {
+                Events::update(ctx, event).await;
+            }
         }
     }
 }
@@ -89,35 +99,16 @@ impl Default for Events {
     }
 }
 
-pub struct EventsContainer;
-impl TypeMapKey for EventsContainer {
-    type Value = Arc<RwLock<Events>>;
+#[command]
+pub async fn refresh(ctx: &Context, msg: &Message) -> CommandResult {
+    if let Some(guild) = msg.guild_id {
+        let events = ctx
+            .http
+            .get_scheduled_events(*guild.as_u64(), false)
+            .await?;
+        for event in events {
+            Events::update(ctx, event).await;
+        }
+    }
+    Ok(())
 }
-
-// #[command]
-// pub async fn create_event(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
-//     let Ok(title) = args.single::<String>() else {
-//             msg.reply(ctx, "Please enter a valid title.").await?;
-//             return Ok(());
-//         };
-//     let Ok(description) = args.single::<String>() else {
-//             msg.reply(ctx, "Please enter a valid description.").await?;
-//             return Ok(());
-//         };
-//     let Ok(Channel::Guild(channel)) = msg.channel(ctx).await else {
-//             msg.reply(ctx, "An error occured.").await?;
-//             return Ok(());
-//         };
-//     let Some(event) = EventBuilder::new()
-//         .title(title)
-//         .description(description)
-//         .build_and_send(ctx, channel)
-//         .await else {
-//             msg.reply(ctx, "An error occured.").await?;
-//             return Ok(());
-//         };
-
-//     event.add(ctx).await;
-
-//     Ok(())
-// }

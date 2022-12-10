@@ -1,4 +1,4 @@
-use crate::commands::{event::msg::EventMessage, event::team::Team};
+use super::{msg::EventMessage, team::Team};
 use serde::{Deserialize, Serialize};
 use serenity::{model::prelude::*, prelude::*};
 
@@ -38,8 +38,8 @@ impl EventBuilder {
             event: None,
         }
     }
-    pub fn event(mut self, event: ScheduledEvent) -> EventBuilder {
-        self.event = Some(event);
+    pub fn event(mut self, event: &ScheduledEvent) -> EventBuilder {
+        self.event = Some(event.clone());
         self
     }
     pub async fn build_and_send(self, ctx: &Context, channel_id: ChannelId) -> Option<Event> {

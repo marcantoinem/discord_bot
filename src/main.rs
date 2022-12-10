@@ -1,18 +1,13 @@
-#![allow(dead_code)]
+// #![allow(dead_code)]
 mod commands;
 
-use commands::events::{Events, EventsContainer, PATH};
+use commands::events::*;
+use serenity::framework::standard::{macros::group, StandardFramework};
+use serenity::{async_trait, model::prelude::*, prelude::*};
 use std::{env, fs, sync::Arc};
 
-use serenity::{
-    async_trait,
-    framework::standard::{macros::group, StandardFramework},
-    model::prelude::*,
-    prelude::*,
-};
-
 #[group]
-// #[commands()]
+#[commands(refresh)]
 struct General;
 
 struct Handler;
@@ -25,9 +20,11 @@ impl EventHandler for Handler {
     async fn guild_scheduled_event_delete(&self, ctx: Context, scheduled_event: ScheduledEvent) {
         Events::delete(&ctx, scheduled_event).await;
     }
-
     async fn guild_scheduled_event_update(&self, ctx: Context, scheduled_event: ScheduledEvent) {
         Events::update(&ctx, scheduled_event).await;
+    }
+    async fn ready(&self, ctx: Context, ready: Ready) {
+        Events::refresh(&ctx, ready).await;
     }
 }
 
@@ -46,7 +43,7 @@ async fn main() {
         .await
         .expect("Error creating client");
 
-    // Initialize the Arc RwLock which keep the data.
+    // Initialize the Arc RwLock which keep the data and refresh it.
     {
         let mut data = client.data.write().await;
         let saved_data = match fs::read_to_string(PATH) {
