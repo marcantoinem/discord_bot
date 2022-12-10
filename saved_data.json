@@ -1,99 +1,4 @@
 {
-  "1051035444940386344": {
-    "teams": [
-      []
-    ],
-    "event": {
-      "id": "1051035444940386344",
-      "guild_id": "1039966808897232946",
-      "channel_id": null,
-      "creator_id": "330450347661197313",
-      "name": "New",
-      "description": "desc",
-      "scheduled_start_time": "2022-12-10T08:00:00.985Z",
-      "scheduled_end_time": "2022-12-10T10:00:00.985Z",
-      "status": 1,
-      "creator": {
-        "id": "330450347661197313",
-        "avatar": "580ecaebc5552054d2122dc124f9e058",
-        "bot": false,
-        "discriminator": "1698",
-        "username": "Lemark",
-        "public_flags": 128,
-        "banner": null,
-        "accent_color": null,
-        "member": null
-      },
-      "entity_type": 3,
-      "entity_metadata": {
-        "location": "Somewhere"
-      },
-      "user_count": null,
-      "image": null
-    },
-    "msg": {
-      "id": "1051036541394362408",
-      "channel_id": "1050254533537845288",
-      "author": {
-        "id": "931196986298888242",
-        "avatar": "d39ca0876af8bed4fffa52958d3a446b",
-        "bot": true,
-        "discriminator": "6348",
-        "username": "NovaBot",
-        "public_flags": 0,
-        "banner": null,
-        "accent_color": null,
-        "member": null
-      },
-      "content": "",
-      "timestamp": "2022-12-10T07:23:58.783Z",
-      "edited_timestamp": "2022-12-10T07:24:38.681113Z",
-      "tts": false,
-      "mention_everyone": false,
-      "mentions": [],
-      "mention_roles": [],
-      "mention_channels": [],
-      "attachments": [],
-      "embeds": [
-        {
-          "author": null,
-          "color": null,
-          "description": "desc",
-          "fields": [],
-          "footer": {
-            "text": "Somewhere",
-            "icon_url": null,
-            "proxy_icon_url": null
-          },
-          "image": null,
-          "type": "rich",
-          "provider": null,
-          "thumbnail": null,
-          "timestamp": "2022-12-10T08:00:00.985Z",
-          "title": "New",
-          "url": null,
-          "video": null
-        }
-      ],
-      "reactions": [],
-      "nonce": null,
-      "pinned": false,
-      "webhook_id": null,
-      "type": 0,
-      "activity": null,
-      "application": null,
-      "application_id": null,
-      "message_reference": null,
-      "flags": 0,
-      "referenced_message": null,
-      "interaction": null,
-      "thread": null,
-      "components": [],
-      "sticker_items": [],
-      "guild_id": null,
-      "member": null
-    }
-  },
   "1051031242839171083": {
     "teams": [
       []
@@ -166,6 +71,96 @@
           "thumbnail": null,
           "timestamp": "2022-12-10T08:00:00.487Z",
           "title": "Hello",
+          "url": null,
+          "video": null
+        }
+      ],
+      "reactions": [],
+      "nonce": null,
+      "pinned": false,
+      "webhook_id": null,
+      "type": 0,
+      "activity": null,
+      "application": null,
+      "application_id": null,
+      "message_reference": null,
+      "flags": 0,
+      "referenced_message": null,
+      "interaction": null,
+      "thread": null,
+      "components": [],
+      "sticker_items": [],
+      "guild_id": null,
+      "member": null
+    }
+  },
+  "1050942451575173170": {
+    "teams": [
+      []
+    ],
+    "event": {
+      "id": "1050942451575173170",
+      "guild_id": "1039966808897232946",
+      "channel_id": null,
+      "creator_id": "330450347661197313",
+      "name": "CSGames",
+      "description": null,
+      "scheduled_start_time": "2023-03-17T12:00:00Z",
+      "scheduled_end_time": "2023-03-20T02:00:00Z",
+      "status": 1,
+      "creator": null,
+      "entity_type": 3,
+      "entity_metadata": {
+        "location": "Chicoutimi, Saguenay-Lac-Saint-Jean"
+      },
+      "user_count": null,
+      "image": "9df11e1e9443fb42887fe326fc3a87c7"
+    },
+    "msg": {
+      "id": "1051263774436380722",
+      "channel_id": "1050254533537845288",
+      "author": {
+        "id": "931196986298888242",
+        "avatar": "d39ca0876af8bed4fffa52958d3a446b",
+        "bot": true,
+        "discriminator": "6348",
+        "username": "NovaBot",
+        "public_flags": 0,
+        "banner": null,
+        "accent_color": null,
+        "member": null
+      },
+      "content": "",
+      "timestamp": "2022-12-10T22:26:55.362Z",
+      "edited_timestamp": "2022-12-10T22:34:44.169322Z",
+      "tts": false,
+      "mention_everyone": false,
+      "mentions": [],
+      "mention_roles": [],
+      "mention_channels": [],
+      "attachments": [],
+      "embeds": [
+        {
+          "author": null,
+          "color": null,
+          "description": "Les inscriptions sont en janvier. http://2023.csgames.org/",
+          "fields": [],
+          "footer": {
+            "text": "UQAC - Chicoutimi",
+            "icon_url": null,
+            "proxy_icon_url": null
+          },
+          "image": {
+            "url": "https://cdn.discordapp.com/guild-events/1050942451575173170/011d03afb5112b1a516a383bad8b8f57?size=512",
+            "proxy_url": "https://images-ext-2.discordapp.net/external/Y-sD78TXyzUIBch0ICm9sjr9fHVrfG80sfiNnpjAH08/%3Fsize%3D512/https/cdn.discordapp.com/guild-events/1050942451575173170/011d03afb5112b1a516a383bad8b8f57",
+            "height": 204,
+            "width": 512
+          },
+          "type": "rich",
+          "provider": null,
+          "thumbnail": null,
+          "timestamp": "2023-03-17T12:00:00Z",
+          "title": "CSGames",
           "url": null,
           "video": null
         }
@@ -284,30 +279,40 @@
       "member": null
     }
   },
-  "1050937384155480124": {
+  "1051035444940386344": {
     "teams": [
       []
     ],
     "event": {
-      "id": "1050937384155480124",
+      "id": "1051035444940386344",
       "guild_id": "1039966808897232946",
       "channel_id": null,
       "creator_id": "330450347661197313",
-      "name": "Findin da way",
-      "description": "Do you know da way?",
-      "scheduled_start_time": "2022-12-10T02:00:00.176Z",
-      "scheduled_end_time": "2022-12-10T04:00:00.176Z",
+      "name": "New",
+      "description": "desc",
+      "scheduled_start_time": "2022-12-10T08:00:00.985Z",
+      "scheduled_end_time": "2022-12-10T10:00:00.985Z",
       "status": 1,
-      "creator": null,
+      "creator": {
+        "id": "330450347661197313",
+        "avatar": "580ecaebc5552054d2122dc124f9e058",
+        "bot": false,
+        "discriminator": "1698",
+        "username": "Lemark",
+        "public_flags": 128,
+        "banner": null,
+        "accent_color": null,
+        "member": null
+      },
       "entity_type": 3,
       "entity_metadata": {
-        "location": "Uganda"
+        "location": "Somewhere"
       },
       "user_count": null,
-      "image": "210b9e09eb6c75b8bfa79db349fe4cc2"
+      "image": null
     },
     "msg": {
-      "id": "1050937385480896533",
+      "id": "1051036541394362408",
       "channel_id": "1050254533537845288",
       "author": {
         "id": "931196986298888242",
@@ -321,8 +326,8 @@
         "member": null
       },
       "content": "",
-      "timestamp": "2022-12-10T00:49:58.171Z",
-      "edited_timestamp": "2022-12-10T07:24:38.264366Z",
+      "timestamp": "2022-12-10T07:23:58.783Z",
+      "edited_timestamp": "2022-12-10T07:24:38.681113Z",
       "tts": false,
       "mention_everyone": false,
       "mentions": [],
@@ -333,24 +338,19 @@
         {
           "author": null,
           "color": null,
-          "description": "Do you know da way?",
+          "description": "desc",
           "fields": [],
           "footer": {
-            "text": "Uganda2",
+            "text": "Somewhere",
             "icon_url": null,
             "proxy_icon_url": null
           },
-          "image": {
-            "url": "https://cdn.discordapp.com/guild-events/1050937384155480124/210b9e09eb6c75b8bfa79db349fe4cc2?size=512",
-            "proxy_url": "https://images-ext-1.discordapp.net/external/StwcCKJPhhVlZXeKu5JNcLbhvQ83hrxMv3I6XEAqVlI/%3Fsize%3D512/https/cdn.discordapp.com/guild-events/1050937384155480124/210b9e09eb6c75b8bfa79db349fe4cc2",
-            "height": 204,
-            "width": 512
-          },
+          "image": null,
           "type": "rich",
           "provider": null,
           "thumbnail": null,
-          "timestamp": "2022-12-29T22:30:00Z",
-          "title": "Findin da way",
+          "timestamp": "2022-12-10T08:00:00.985Z",
+          "title": "New",
           "url": null,
           "video": null
         }
@@ -464,40 +464,30 @@
       "member": null
     }
   },
-  "1050884052183437412": {
+  "1050937384155480124": {
     "teams": [
       []
     ],
     "event": {
-      "id": "1050884052183437412",
+      "id": "1050937384155480124",
       "guild_id": "1039966808897232946",
       "channel_id": null,
       "creator_id": "330450347661197313",
-      "name": "Math",
-      "description": "Let epsilon be negative.",
-      "scheduled_start_time": "2022-12-15T22:00:00Z",
-      "scheduled_end_time": "2022-12-27T23:00:00Z",
+      "name": "Findin da way",
+      "description": "Do you know da way?",
+      "scheduled_start_time": "2022-12-10T02:00:00.176Z",
+      "scheduled_end_time": "2022-12-10T04:00:00.176Z",
       "status": 1,
-      "creator": {
-        "id": "330450347661197313",
-        "avatar": "580ecaebc5552054d2122dc124f9e058",
-        "bot": false,
-        "discriminator": "1698",
-        "username": "Lemark",
-        "public_flags": 128,
-        "banner": null,
-        "accent_color": null,
-        "member": null
-      },
+      "creator": null,
       "entity_type": 3,
       "entity_metadata": {
-        "location": "Tangente"
+        "location": "Uganda"
       },
       "user_count": null,
-      "image": null
+      "image": "210b9e09eb6c75b8bfa79db349fe4cc2"
     },
     "msg": {
-      "id": "1050933520614293605",
+      "id": "1051263773006106645",
       "channel_id": "1050254533537845288",
       "author": {
         "id": "931196986298888242",
@@ -511,8 +501,8 @@
         "member": null
       },
       "content": "",
-      "timestamp": "2022-12-10T00:34:36.715Z",
-      "edited_timestamp": "2022-12-10T07:24:38.088164Z",
+      "timestamp": "2022-12-10T22:26:55.021Z",
+      "edited_timestamp": "2022-12-10T22:34:44.006703Z",
       "tts": false,
       "mention_everyone": false,
       "mentions": [],
@@ -523,24 +513,24 @@
         {
           "author": null,
           "color": null,
-          "description": "Let epsilon be negative.",
+          "description": "Do you know da way?",
           "fields": [],
           "footer": {
-            "text": "Somewhere existing",
+            "text": "Uganda",
             "icon_url": null,
             "proxy_icon_url": null
           },
           "image": {
-            "url": "https://cdn.discordapp.com/guild-events/1050884052183437412/5b60b05fe92026575f771ff19dfd2e6c?size=512",
-            "proxy_url": "https://images-ext-1.discordapp.net/external/gOtbqP-Avaix_HlWcpqI1ri3lt3pbb5__tThXVcD8EE/%3Fsize%3D512/https/cdn.discordapp.com/guild-events/1050884052183437412/5b60b05fe92026575f771ff19dfd2e6c",
+            "url": "https://cdn.discordapp.com/guild-events/1050937384155480124/210b9e09eb6c75b8bfa79db349fe4cc2?size=512",
+            "proxy_url": "https://images-ext-1.discordapp.net/external/StwcCKJPhhVlZXeKu5JNcLbhvQ83hrxMv3I6XEAqVlI/%3Fsize%3D512/https/cdn.discordapp.com/guild-events/1050937384155480124/210b9e09eb6c75b8bfa79db349fe4cc2",
             "height": 204,
             "width": 512
           },
           "type": "rich",
           "provider": null,
           "thumbnail": null,
-          "timestamp": "2022-12-15T22:00:00Z",
-          "title": "Math",
+          "timestamp": "2022-12-29T22:30:00Z",
+          "title": "Findin da way",
           "url": null,
           "video": null
         }
@@ -659,30 +649,40 @@
       "member": null
     }
   },
-  "1050942451575173170": {
+  "1050884052183437412": {
     "teams": [
       []
     ],
     "event": {
-      "id": "1050942451575173170",
+      "id": "1050884052183437412",
       "guild_id": "1039966808897232946",
       "channel_id": null,
       "creator_id": "330450347661197313",
-      "name": "CSGames",
-      "description": null,
-      "scheduled_start_time": "2023-03-17T12:00:00Z",
-      "scheduled_end_time": "2023-03-20T02:00:00Z",
+      "name": "Math",
+      "description": "Let epsilon be negative.",
+      "scheduled_start_time": "2022-12-15T22:00:00Z",
+      "scheduled_end_time": "2022-12-27T23:00:00Z",
       "status": 1,
-      "creator": null,
+      "creator": {
+        "id": "330450347661197313",
+        "avatar": "580ecaebc5552054d2122dc124f9e058",
+        "bot": false,
+        "discriminator": "1698",
+        "username": "Lemark",
+        "public_flags": 128,
+        "banner": null,
+        "accent_color": null,
+        "member": null
+      },
       "entity_type": 3,
       "entity_metadata": {
-        "location": "Chicoutimi, Saguenay-Lac-Saint-Jean"
+        "location": "Tangente"
       },
       "user_count": null,
-      "image": "9df11e1e9443fb42887fe326fc3a87c7"
+      "image": null
     },
     "msg": {
-      "id": "1050942453198356571",
+      "id": "1051263771647156254",
       "channel_id": "1050254533537845288",
       "author": {
         "id": "931196986298888242",
@@ -696,8 +696,8 @@
         "member": null
       },
       "content": "",
-      "timestamp": "2022-12-10T01:10:06.409Z",
-      "edited_timestamp": "2022-12-10T07:24:38.457813Z",
+      "timestamp": "2022-12-10T22:26:54.697Z",
+      "edited_timestamp": "2022-12-10T22:35:15.041374Z",
       "tts": false,
       "mention_everyone": false,
       "mentions": [],
@@ -708,24 +708,24 @@
         {
           "author": null,
           "color": null,
-          "description": "Les inscriptions sont en janvier. http://2023.csgames.org/",
+          "description": "Let epsilon be negative.",
           "fields": [],
           "footer": {
-            "text": "UQAC - Chicoutimi",
+            "text": "Somewhere existing or not",
             "icon_url": null,
             "proxy_icon_url": null
           },
           "image": {
-            "url": "https://cdn.discordapp.com/guild-events/1050942451575173170/011d03afb5112b1a516a383bad8b8f57?size=512",
-            "proxy_url": "https://images-ext-2.discordapp.net/external/Y-sD78TXyzUIBch0ICm9sjr9fHVrfG80sfiNnpjAH08/%3Fsize%3D512/https/cdn.discordapp.com/guild-events/1050942451575173170/011d03afb5112b1a516a383bad8b8f57",
+            "url": "https://cdn.discordapp.com/guild-events/1050884052183437412/5b60b05fe92026575f771ff19dfd2e6c?size=512",
+            "proxy_url": "https://images-ext-1.discordapp.net/external/gOtbqP-Avaix_HlWcpqI1ri3lt3pbb5__tThXVcD8EE/%3Fsize%3D512/https/cdn.discordapp.com/guild-events/1050884052183437412/5b60b05fe92026575f771ff19dfd2e6c",
             "height": 204,
             "width": 512
           },
           "type": "rich",
           "provider": null,
           "thumbnail": null,
-          "timestamp": "2023-03-17T12:00:00Z",
-          "title": "CSGames",
+          "timestamp": "2022-12-15T22:00:00Z",
+          "title": "Math",
           "url": null,
           "video": null
         }

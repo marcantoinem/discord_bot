@@ -9,26 +9,15 @@ struct Handler;
 #[async_trait]
 impl EventHandler for Handler {
     async fn guild_scheduled_event_create(&self, ctx: Context, scheduled_event: ScheduledEvent) {
-        println!("This should output on event create!");
         Events::add(&ctx, scheduled_event).await;
     }
     async fn guild_scheduled_event_delete(&self, ctx: Context, scheduled_event: ScheduledEvent) {
-        println!("This should output on event delete!");
         Events::delete(&ctx, scheduled_event).await;
     }
     async fn guild_scheduled_event_update(&self, ctx: Context, scheduled_event: ScheduledEvent) {
-        println!("This should output on event update!");
         Events::update(&ctx, scheduled_event).await;
     }
-    async fn message(&self, _ctx: Context, _: Message) {
-        println!("I see a message.");
-    }
-    async fn channel_create(&self, _: Context, _: GuildChannel) {
-        println!("I see a channel.");
-    }
-
     async fn ready(&self, ctx: Context, ready: Ready) {
-        println!("This should output, ready!");
         Events::refresh(&ctx, ready).await;
     }
 }
