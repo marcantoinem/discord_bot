@@ -9,15 +9,15 @@ struct Handler;
 #[async_trait]
 impl EventHandler for Handler {
     async fn guild_scheduled_event_create(&self, ctx: Context, scheduled_event: ScheduledEvent) {
-        println!("This should output, create!");
+        println!("This should output on event create!");
         Events::add(&ctx, scheduled_event).await;
     }
     async fn guild_scheduled_event_delete(&self, ctx: Context, scheduled_event: ScheduledEvent) {
-        println!("This should output, delete!");
+        println!("This should output on event delete!");
         Events::delete(&ctx, scheduled_event).await;
     }
     async fn guild_scheduled_event_update(&self, ctx: Context, scheduled_event: ScheduledEvent) {
-        println!("This should output, update!");
+        println!("This should output on event update!");
         Events::update(&ctx, scheduled_event).await;
     }
     async fn message(&self, _ctx: Context, _: Message) {
@@ -38,7 +38,7 @@ async fn main() {
     // Configure the client with your Discord bot token in the environment.
     let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
 
-    let intents = GatewayIntents::all();
+    let intents = GatewayIntents::non_privileged() | GatewayIntents::GUILD_SCHEDULED_EVENTS;
     // Build our client.
     let mut client = Client::builder(token, intents)
         .event_handler(Handler)
