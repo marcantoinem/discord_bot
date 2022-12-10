@@ -1,45 +1,47 @@
-// #![allow(dead_code)]
 mod commands;
 
 use commands::events::*;
-use serenity::framework::standard::{macros::group, StandardFramework};
 use serenity::{async_trait, model::prelude::*, prelude::*};
 use std::{env, fs, sync::Arc};
-
-#[group]
-#[commands(refresh)]
-struct General;
 
 struct Handler;
 
 #[async_trait]
 impl EventHandler for Handler {
     async fn guild_scheduled_event_create(&self, ctx: Context, scheduled_event: ScheduledEvent) {
+        println!("This should output, create!");
         Events::add(&ctx, scheduled_event).await;
     }
     async fn guild_scheduled_event_delete(&self, ctx: Context, scheduled_event: ScheduledEvent) {
+        println!("This should output, delete!");
         Events::delete(&ctx, scheduled_event).await;
     }
     async fn guild_scheduled_event_update(&self, ctx: Context, scheduled_event: ScheduledEvent) {
+        println!("This should output, update!");
         Events::update(&ctx, scheduled_event).await;
     }
+    async fn message(&self, _ctx: Context, _: Message) {
+        println!("I see a message.");
+    }
+    async fn channel_create(&self, _: Context, _: GuildChannel) {
+        println!("I see a channel.");
+    }
+
     async fn ready(&self, ctx: Context, ready: Ready) {
+        println!("This should output, ready!");
         Events::refresh(&ctx, ready).await;
     }
 }
 
 #[tokio::main]
 async fn main() {
-    let framework = StandardFramework::new()
-        .configure(|c| c.prefix(";")) // set the bot's prefix to ";"
-        .group(&GENERAL_GROUP);
+    // Configure the client with your Discord bot token in the environment.
+    let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
 
-    // Login with a bot token from the environment
-    let token = env::var("DISCORD_TOKEN").expect("token");
-    let intents = GatewayIntents::non_privileged() | GatewayIntents::MESSAGE_CONTENT;
+    let intents = GatewayIntents::all();
+    // Build our client.
     let mut client = Client::builder(token, intents)
         .event_handler(Handler)
-        .framework(framework)
         .await
         .expect("Error creating client");
 
@@ -55,8 +57,11 @@ async fn main() {
         data.insert::<EventsContainer>(Arc::new(RwLock::new(saved_data)));
     }
 
-    // Start listening for events by starting a single shard
+    // Finally, start a single shard, and start listening to events.
+    //
+    // Shards will automatically attempt to reconnect, and will perform exponential backoff until
+    // it reconnects.
     if let Err(why) = client.start().await {
-        println!("An error occurred while running the client: {:?}", why);
+        println!("Client error: {:?}", why);
     }
 }

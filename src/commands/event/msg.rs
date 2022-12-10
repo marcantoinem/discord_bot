@@ -1,4 +1,8 @@
-use serenity::{model::prelude::*, prelude::*};
+use serenity::{
+    builder::{CreateEmbed, CreateEmbedFooter, CreateMessage, EditMessage},
+    model::prelude::*,
+    prelude::*,
+};
 
 pub struct EventMessage {
     title: String,
@@ -41,33 +45,18 @@ impl EventMessage {
         ctx: &Context,
         channel_id: ChannelId,
     ) -> Result<Message, SerenityError> {
-        let title = self.title.clone();
-        let description = self.description.clone();
-        let location = self.location.clone();
-        let start_time = self.start_time.clone();
+        let embed = CreateEmbed::new()
+            .title(self.title.clone())
+            .description(self.description.clone())
+            .timestamp(self.start_time)
+            .footer(CreateEmbedFooter::new(self.location.clone()));
         if let Some(image) = self.image.clone() {
-            channel_id
-                .send_message(&ctx.http, |m| {
-                    m.embed(|e| {
-                        e.title(title)
-                            .description(description)
-                            .image(image)
-                            .footer(|f| f.text(location))
-                            .timestamp(start_time)
-                    })
-                })
-                .await
+            let embed = embed.image(image);
+            let message = CreateMessage::new().add_embed(embed);
+            channel_id.send_message(&ctx.http, message).await
         } else {
-            channel_id
-                .send_message(&ctx.http, |m| {
-                    m.embed(|e| {
-                        e.title(title)
-                            .description(description)
-                            .footer(|f| f.text(location))
-                            .timestamp(start_time)
-                    })
-                })
-                .await
+            let message = CreateMessage::new().add_embed(embed);
+            channel_id.send_message(&ctx.http, message).await
         }
     }
     pub async fn build_and_edit(
@@ -76,32 +65,21 @@ impl EventMessage {
         channel_id: ChannelId,
         message_id: MessageId,
     ) -> Result<Message, SerenityError> {
-        let title = self.title.clone();
-        let description = self.description.clone();
-        let location = self.location.clone();
-        let start_time = self.start_time.clone();
-        if let Some(image) = self.image.clone() {
+        let embed = CreateEmbed::new()
+            .title(self.title.clone())
+            .description(self.description.clone())
+            .timestamp(self.start_time)
+            .footer(CreateEmbedFooter::new(self.location.clone()));
+        if let Some(image) = self.image.clone().clone() {
+            let embed = embed.image(image);
+            let message = EditMessage::new().add_embed(embed);
             channel_id
-                .edit_message(&ctx.http, message_id, |m| {
-                    m.embed(|e| {
-                        e.title(title)
-                            .description(description)
-                            .image(image)
-                            .footer(|f| f.text(location))
-                            .timestamp(start_time)
-                    })
-                })
+                .edit_message(&ctx.http, message_id, message)
                 .await
         } else {
+            let message = EditMessage::new().add_embed(embed);
             channel_id
-                .edit_message(&ctx.http, message_id, |m| {
-                    m.embed(|e| {
-                        e.title(title)
-                            .description(description)
-                            .footer(|f| f.text(location))
-                            .timestamp(start_time)
-                    })
-                })
+                .edit_message(&ctx.http, message_id, message)
                 .await
         }
     }

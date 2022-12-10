@@ -2,7 +2,6 @@ use std::{collections::HashMap, fs, sync::Arc};
 
 use crate::commands::event::event::{Event, EventBuilder, CHANNEL_ID};
 use serde::{Deserialize, Serialize};
-use serenity::framework::standard::{macros::command, CommandResult};
 use serenity::{model::prelude::*, prelude::*};
 
 pub const PATH: &str = "./saved_data.json";
@@ -82,10 +81,9 @@ impl Events {
         for guild in guilds {
             let events = ctx
                 .http
-                .get_scheduled_events(*guild.id.as_u64(), false)
+                .get_scheduled_events(guild.id, false)
                 .await
                 .expect("Cannot get event");
-            println!("{:?}", events);
             for event in events {
                 Events::update(ctx, event).await;
             }
@@ -99,16 +97,17 @@ impl Default for Events {
     }
 }
 
-#[command]
-pub async fn refresh(ctx: &Context, msg: &Message) -> CommandResult {
-    if let Some(guild) = msg.guild_id {
-        let events = ctx
-            .http
-            .get_scheduled_events(*guild.as_u64(), false)
-            .await?;
-        for event in events {
-            Events::update(ctx, event).await;
-        }
-    }
-    Ok(())
-}
+// #[command]
+// pub async fn refresh(ctx: &Context, msg: &Message) -> CommandResult {
+//     if let Some(guild) = msg.guild_id {
+//         let events = ctx.http.get_scheduled_events(guild, false).await?;
+//         for event in events {
+//             Events::update(ctx, event).await;
+//         }
+//         let bot_response = msg.reply(ctx, "Refresh was successfull").await?;
+//         sleep(Duration::from_secs(2)).await;
+//         bot_response.delete(ctx).await?;
+//     }
+//     msg.delete(ctx).await?;
+//     Ok(())
+// }
