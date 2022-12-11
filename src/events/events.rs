@@ -1,6 +1,6 @@
 use std::{collections::HashMap, fs, sync::Arc};
 
-use crate::commands::event::event::{Event, EventBuilder, CHANNEL_ID};
+use crate::events::event::event::{Event, EventBuilder, CHANNEL_ID};
 use serde::{Deserialize, Serialize};
 use serenity::{model::prelude::*, prelude::*};
 
@@ -76,7 +76,7 @@ impl Events {
             fs::write(PATH, serialized_json).expect("Can't save data.");
         }
     }
-    pub async fn refresh(ctx: &Context, ready: Ready) {
+    pub async fn refresh(ctx: &Context, ready: &Ready) {
         let guilds = ready.guilds.iter();
         for guild in guilds {
             let events = ctx
@@ -96,18 +96,3 @@ impl Default for Events {
         Events(HashMap::new())
     }
 }
-
-// #[command]
-// pub async fn refresh(ctx: &Context, msg: &Message) -> CommandResult {
-//     if let Some(guild) = msg.guild_id {
-//         let events = ctx.http.get_scheduled_events(guild, false).await?;
-//         for event in events {
-//             Events::update(ctx, event).await;
-//         }
-//         let bot_response = msg.reply(ctx, "Refresh was successfull").await?;
-//         sleep(Duration::from_secs(2)).await;
-//         bot_response.delete(ctx).await?;
-//     }
-//     msg.delete(ctx).await?;
-//     Ok(())
-// }

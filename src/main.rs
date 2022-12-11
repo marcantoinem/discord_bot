@@ -1,6 +1,8 @@
-mod commands;
+pub mod commands;
+pub mod events;
+pub mod utils;
 
-use commands::events::*;
+use events::events::*;
 use serenity::{async_trait, model::prelude::*, prelude::*};
 use std::{env, fs, sync::Arc};
 
@@ -18,7 +20,10 @@ impl EventHandler for Handler {
         Events::update(&ctx, scheduled_event).await;
     }
     async fn ready(&self, ctx: Context, ready: Ready) {
-        Events::refresh(&ctx, ready).await;
+        utils::ready(&ctx, ready).await;
+    }
+    async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
+        utils::interaction_create(&ctx, interaction).await;
     }
 }
 
