@@ -42,10 +42,10 @@ async fn main() {
     // Initialize the Arc RwLock which keep the data and refresh it.
     {
         let mut data = client.data.write().await;
-        let saved_data = match fs::read_to_string(PATH) {
+        let saved_data = match fs::read(PATH) {
             Err(_) => Events::default(),
             Ok(file_content) => {
-                serde_json::from_str(&file_content).expect("File is probably corrupted.")
+                bincode::deserialize(&file_content[..]).expect("File is probably corrupted.")
             }
         };
         data.insert::<EventsContainer>(Arc::new(RwLock::new(saved_data)));

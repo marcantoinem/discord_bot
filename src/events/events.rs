@@ -4,7 +4,7 @@ use crate::events::event::event::{Event, EventBuilder, CHANNEL_ID};
 use serde::{Deserialize, Serialize};
 use serenity::{model::prelude::*, prelude::*};
 
-pub const PATH: &str = "./saved_data.json";
+pub const PATH: &str = "./saved_data.bin";
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Events(HashMap<ScheduledEventId, Event>);
@@ -34,9 +34,8 @@ impl Events {
         {
             let mut events = events_lock.write().await;
             events.0.insert(scheduled_event.id, event);
-            let serialized_json =
-                serde_json::to_string_pretty(&events.0).expect("Serialization failed.");
-            fs::write(PATH, serialized_json).expect("Can't save data.");
+            let data = bincode::serialize(&events.0).expect("Serialization failed.");
+            fs::write(PATH, data).expect("Can't save data.");
         }
     }
     pub async fn delete(ctx: &Context, scheduled_event: ScheduledEvent) {
@@ -50,9 +49,8 @@ impl Events {
                 }
             }
             events.0.remove(&scheduled_event.id);
-            let serialized_json =
-                serde_json::to_string_pretty(&events.0).expect("Serialization failed.");
-            fs::write(PATH, serialized_json).expect("Can't save data.");
+            let data = bincode::serialize(&events.0).expect("Serialization failed.");
+            fs::write(PATH, data).expect("Can't save data.");
         }
     }
     pub async fn update(ctx: &Context, scheduled_event: ScheduledEvent) {
@@ -71,9 +69,8 @@ impl Events {
                     .unwrap();
                 events.0.insert(event.event.id, event);
             };
-            let serialized_json =
-                serde_json::to_string_pretty(&events.0).expect("Serialization failed.");
-            fs::write(PATH, serialized_json).expect("Can't save data.");
+            let data = bincode::serialize(&events.0).expect("Serialization failed.");
+            fs::write(PATH, data).expect("Can't save data.");
         }
     }
     pub async fn refresh(ctx: &Context, ready: &Ready) {
