@@ -1,14 +1,10 @@
-// #![allow(dead_code)]
-mod commands;
+pub mod commands;
+pub mod events;
+pub mod utils;
 
-use commands::events::*;
-use serenity::framework::standard::{macros::group, StandardFramework};
+use events::events::*;
 use serenity::{async_trait, model::prelude::*, prelude::*};
 use std::{env, fs, sync::Arc};
-
-#[group]
-#[commands(refresh)]
-struct General;
 
 struct Handler;
 
@@ -24,39 +20,42 @@ impl EventHandler for Handler {
         Events::update(&ctx, scheduled_event).await;
     }
     async fn ready(&self, ctx: Context, ready: Ready) {
-        Events::refresh(&ctx, ready).await;
+        utils::ready(&ctx, ready).await;
+    }
+    async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
+        utils::interaction_create(&ctx, interaction).await;
     }
 }
 
 #[tokio::main]
 async fn main() {
-    let framework = StandardFramework::new()
-        .configure(|c| c.prefix(";")) // set the bot's prefix to ";"
-        .group(&GENERAL_GROUP);
+    // Configure the client with your Discord bot token in the environment.
+    let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
 
-    // Login with a bot token from the environment
-    let token = env::var("DISCORD_TOKEN").expect("token");
-    let intents = GatewayIntents::non_privileged() | GatewayIntents::MESSAGE_CONTENT;
+    let intents = GatewayIntents::non_privileged() | GatewayIntents::GUILD_SCHEDULED_EVENTS;
+    // Build our client.
     let mut client = Client::builder(token, intents)
         .event_handler(Handler)
-        .framework(framework)
         .await
         .expect("Error creating client");
 
     // Initialize the Arc RwLock which keep the data and refresh it.
     {
         let mut data = client.data.write().await;
-        let saved_data = match fs::read_to_string(PATH) {
+        let saved_data = match fs::read(PATH) {
             Err(_) => Events::default(),
             Ok(file_content) => {
-                serde_json::from_str(&file_content).expect("File is probably corrupted.")
+                bincode::deserialize(&file_content[..]).expect("File is probably corrupted.")
             }
         };
         data.insert::<EventsContainer>(Arc::new(RwLock::new(saved_data)));
     }
 
-    // Start listening for events by starting a single shard
+    // Finally, start a single shard, and start listening to events.
+    //
+    // Shards will automatically attempt to reconnect, and will perform exponential backoff until
+    // it reconnects.
     if let Err(why) = client.start().await {
-        println!("An error occurred while running the client: {:?}", why);
+        println!("Client error: {:?}", why);
     }
 }

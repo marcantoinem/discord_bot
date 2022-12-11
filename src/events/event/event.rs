@@ -1,8 +1,12 @@
 use super::{msg::EventMessage, team::Team};
 use serde::{Deserialize, Serialize};
 use serenity::{model::prelude::*, prelude::*};
+use std::num::NonZeroU64;
 
-pub const CHANNEL_ID: ChannelId = ChannelId(1050254533537845288);
+// Trust me this is safe, unwraping an non zero u64 in NonZeroU64.
+
+pub const CHANNEL_ID: ChannelId =
+    ChannelId(unsafe { NonZeroU64::new_unchecked(1050254533537845288) });
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Event {
