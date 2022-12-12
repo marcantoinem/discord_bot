@@ -1,10 +1,14 @@
-use std::{collections::HashMap, fs, sync::Arc};
+use std::{
+    collections::HashMap,
+    fs::{self},
+    sync::Arc,
+};
 
 use crate::events::event::event::{Event, EventBuilder, CHANNEL_ID};
 use serde::{Deserialize, Serialize};
 use serenity::{model::prelude::*, prelude::*};
 
-pub const PATH: &str = "./saved_data.bin";
+pub const PATH: &str = "./saved_data.json";
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Events(HashMap<ScheduledEventId, Event>);
@@ -34,7 +38,7 @@ impl Events {
         {
             let mut events = events_lock.write().await;
             events.0.insert(scheduled_event.id, event);
-            let data = bincode::serialize(&events.0).expect("Serialization failed.");
+            let data = serde_json::to_string_pretty(&events.0).expect("Serialization failed.");
             fs::write(PATH, data).expect("Can't save data.");
         }
     }
@@ -49,7 +53,7 @@ impl Events {
                 }
             }
             events.0.remove(&scheduled_event.id);
-            let data = bincode::serialize(&events.0).expect("Serialization failed.");
+            let data = serde_json::to_string_pretty(&events.0).expect("Serialization failed.");
             fs::write(PATH, data).expect("Can't save data.");
         }
     }
@@ -69,7 +73,9 @@ impl Events {
                     .unwrap();
                 events.0.insert(event.event.id, event);
             };
-            let data = bincode::serialize(&events.0).expect("Serialization failed.");
+
+            let events = events.clone();
+            let data = serde_json::to_string_pretty(&events).expect("Serialization failed.");
             fs::write(PATH, data).expect("Can't save data.");
         }
     }

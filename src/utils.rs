@@ -16,13 +16,14 @@ pub async fn ready(ctx: &Context, ready: Ready) {
     );
 
     let commands = guild_id
-        .set_application_commands(&ctx.http, vec![commands::refresh::register()])
-        .await;
-
-    println!(
-        "I now have the following guild slash commands: {:#?}",
-        commands
-    );
+        .set_application_commands(
+            &ctx.http,
+            vec![commands::refresh::register(), commands::join::register()],
+        )
+        .await
+        .unwrap();
+    println!("I now have the following guild slash commands:",);
+    commands.iter().for_each(|x| println!("{}", x.name));
 }
 
 pub async fn interaction_create(ctx: &Context, interaction: Interaction) {
@@ -31,6 +32,10 @@ pub async fn interaction_create(ctx: &Context, interaction: Interaction) {
 
         let content = match command.data.name.as_str() {
             "refresh" => Some(commands::refresh::run(&ctx, &command).await),
+            "join" => {
+                commands::join::run(&ctx, &command).await.unwrap();
+                None
+            }
             _ => Some("not implemented :(".to_string()),
         };
 

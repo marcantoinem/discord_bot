@@ -1,0 +1,302 @@
+{
+  "1050937384155480124": {
+    "teams": [
+      []
+    ],
+    "event": {
+      "id": "1050937384155480124",
+      "guild_id": "1039966808897232946",
+      "channel_id": null,
+      "creator_id": "330450347661197313",
+      "name": "Findin da way",
+      "description": "Do you know da way?",
+      "scheduled_start_time": "2022-12-29T22:30:00Z",
+      "scheduled_end_time": "2022-12-29T23:30:00Z",
+      "status": 1,
+      "creator": {
+        "id": "330450347661197313",
+        "avatar": "580ecaebc5552054d2122dc124f9e058",
+        "bot": false,
+        "discriminator": "1698",
+        "username": "Lemark",
+        "public_flags": 128,
+        "banner": null,
+        "accent_color": null,
+        "member": null
+      },
+      "entity_type": 3,
+      "entity_metadata": {
+        "location": "Uganda"
+      },
+      "user_count": null,
+      "image": "210b9e09eb6c75b8bfa79db349fe4cc2"
+    },
+    "msg": {
+      "id": "1051390886069669982",
+      "channel_id": "1050254533537845288",
+      "author": {
+        "id": "931196986298888242",
+        "avatar": "d39ca0876af8bed4fffa52958d3a446b",
+        "bot": true,
+        "discriminator": "6348",
+        "username": "NovaBot",
+        "public_flags": 0,
+        "banner": null,
+        "accent_color": null,
+        "member": null
+      },
+      "content": "",
+      "timestamp": "2022-12-11T06:52:01.137Z",
+      "edited_timestamp": "2022-12-12T04:53:47.817201Z",
+      "tts": false,
+      "mention_everyone": false,
+      "mentions": [],
+      "mention_roles": [],
+      "mention_channels": [],
+      "attachments": [],
+      "embeds": [
+        {
+          "author": null,
+          "color": null,
+          "description": "Do you know da way?",
+          "fields": [],
+          "footer": {
+            "text": "Uganda",
+            "icon_url": null,
+            "proxy_icon_url": null
+          },
+          "image": {
+            "url": "https://cdn.discordapp.com/guild-events/1050937384155480124/210b9e09eb6c75b8bfa79db349fe4cc2?size=512",
+            "proxy_url": "https://images-ext-1.discordapp.net/external/StwcCKJPhhVlZXeKu5JNcLbhvQ83hrxMv3I6XEAqVlI/%3Fsize%3D512/https/cdn.discordapp.com/guild-events/1050937384155480124/210b9e09eb6c75b8bfa79db349fe4cc2",
+            "height": 0,
+            "width": 0
+          },
+          "type": "rich",
+          "provider": null,
+          "thumbnail": null,
+          "timestamp": "2022-12-29T22:30:00Z",
+          "title": "Findin da way",
+          "url": null,
+          "video": null
+        }
+      ],
+      "reactions": [],
+      "nonce": null,
+      "pinned": false,
+      "webhook_id": null,
+      "type": 0,
+      "activity": null,
+      "application": null,
+      "application_id": null,
+      "message_reference": null,
+      "flags": 0,
+      "referenced_message": null,
+      "interaction": null,
+      "thread": null,
+      "components": [],
+      "sticker_items": [],
+      "guild_id": null,
+      "member": null
+    }
+  },
+  "1050884052183437412": {
+    "teams": [
+      []
+    ],
+    "event": {
+      "id": "1050884052183437412",
+      "guild_id": "1039966808897232946",
+      "channel_id": null,
+      "creator_id": "330450347661197313",
+      "name": "Math",
+      "description": "Let epsilon be negative.",
+      "scheduled_start_time": "2022-12-15T22:00:00Z",
+      "scheduled_end_time": "2022-12-27T23:00:00Z",
+      "status": 1,
+      "creator": {
+        "id": "330450347661197313",
+        "avatar": "580ecaebc5552054d2122dc124f9e058",
+        "bot": false,
+        "discriminator": "1698",
+        "username": "Lemark",
+        "public_flags": 128,
+        "banner": null,
+        "accent_color": null,
+        "member": null
+      },
+      "entity_type": 3,
+      "entity_metadata": {
+        "location": "Somewhere existing or not"
+      },
+      "user_count": null,
+      "image": "5b60b05fe92026575f771ff19dfd2e6c"
+    },
+    "msg": {
+      "id": "1051390885465702400",
+      "channel_id": "1050254533537845288",
+      "author": {
+        "id": "931196986298888242",
+        "avatar": "d39ca0876af8bed4fffa52958d3a446b",
+        "bot": true,
+        "discriminator": "6348",
+        "username": "NovaBot",
+        "public_flags": 0,
+        "banner": null,
+        "accent_color": null,
+        "member": null
+      },
+      "content": "",
+      "timestamp": "2022-12-11T06:52:00.993Z",
+      "edited_timestamp": "2022-12-12T04:53:47.583745Z",
+      "tts": false,
+      "mention_everyone": false,
+      "mentions": [],
+      "mention_roles": [],
+      "mention_channels": [],
+      "attachments": [],
+      "embeds": [
+        {
+          "author": null,
+          "color": null,
+          "description": "Let epsilon be negative.",
+          "fields": [],
+          "footer": {
+            "text": "Somewhere existing or not",
+            "icon_url": null,
+            "proxy_icon_url": null
+          },
+          "image": {
+            "url": "https://cdn.discordapp.com/guild-events/1050884052183437412/5b60b05fe92026575f771ff19dfd2e6c?size=512",
+            "proxy_url": "https://images-ext-1.discordapp.net/external/gOtbqP-Avaix_HlWcpqI1ri3lt3pbb5__tThXVcD8EE/%3Fsize%3D512/https/cdn.discordapp.com/guild-events/1050884052183437412/5b60b05fe92026575f771ff19dfd2e6c",
+            "height": 0,
+            "width": 0
+          },
+          "type": "rich",
+          "provider": null,
+          "thumbnail": null,
+          "timestamp": "2022-12-15T22:00:00Z",
+          "title": "Math",
+          "url": null,
+          "video": null
+        }
+      ],
+      "reactions": [],
+      "nonce": null,
+      "pinned": false,
+      "webhook_id": null,
+      "type": 0,
+      "activity": null,
+      "application": null,
+      "application_id": null,
+      "message_reference": null,
+      "flags": 0,
+      "referenced_message": null,
+      "interaction": null,
+      "thread": null,
+      "components": [],
+      "sticker_items": [],
+      "guild_id": null,
+      "member": null
+    }
+  },
+  "1050942451575173170": {
+    "teams": [
+      []
+    ],
+    "event": {
+      "id": "1050942451575173170",
+      "guild_id": "1039966808897232946",
+      "channel_id": null,
+      "creator_id": "330450347661197313",
+      "name": "CSGames",
+      "description": "Les inscriptions sont en janvier. http://2023.csgames.org/",
+      "scheduled_start_time": "2023-03-17T12:00:00Z",
+      "scheduled_end_time": "2023-03-20T02:00:00Z",
+      "status": 1,
+      "creator": {
+        "id": "330450347661197313",
+        "avatar": "580ecaebc5552054d2122dc124f9e058",
+        "bot": false,
+        "discriminator": "1698",
+        "username": "Lemark",
+        "public_flags": 128,
+        "banner": null,
+        "accent_color": null,
+        "member": null
+      },
+      "entity_type": 3,
+      "entity_metadata": {
+        "location": "UQAC - Chicoutimi"
+      },
+      "user_count": null,
+      "image": "011d03afb5112b1a516a383bad8b8f57"
+    },
+    "msg": {
+      "id": "1051390886786904084",
+      "channel_id": "1050254533537845288",
+      "author": {
+        "id": "931196986298888242",
+        "avatar": "d39ca0876af8bed4fffa52958d3a446b",
+        "bot": true,
+        "discriminator": "6348",
+        "username": "NovaBot",
+        "public_flags": 0,
+        "banner": null,
+        "accent_color": null,
+        "member": null
+      },
+      "content": "",
+      "timestamp": "2022-12-11T06:52:01.308Z",
+      "edited_timestamp": "2022-12-12T04:53:47.977448Z",
+      "tts": false,
+      "mention_everyone": false,
+      "mentions": [],
+      "mention_roles": [],
+      "mention_channels": [],
+      "attachments": [],
+      "embeds": [
+        {
+          "author": null,
+          "color": null,
+          "description": "Les inscriptions sont en janvier. http://2023.csgames.org/",
+          "fields": [],
+          "footer": {
+            "text": "UQAC - Chicoutimi",
+            "icon_url": null,
+            "proxy_icon_url": null
+          },
+          "image": {
+            "url": "https://cdn.discordapp.com/guild-events/1050942451575173170/011d03afb5112b1a516a383bad8b8f57?size=512",
+            "proxy_url": "https://images-ext-2.discordapp.net/external/Y-sD78TXyzUIBch0ICm9sjr9fHVrfG80sfiNnpjAH08/%3Fsize%3D512/https/cdn.discordapp.com/guild-events/1050942451575173170/011d03afb5112b1a516a383bad8b8f57",
+            "height": 0,
+            "width": 0
+          },
+          "type": "rich",
+          "provider": null,
+          "thumbnail": null,
+          "timestamp": "2023-03-17T12:00:00Z",
+          "title": "CSGames",
+          "url": null,
+          "video": null
+        }
+      ],
+      "reactions": [],
+      "nonce": null,
+      "pinned": false,
+      "webhook_id": null,
+      "type": 0,
+      "activity": null,
+      "application": null,
+      "application_id": null,
+      "message_reference": null,
+      "flags": 0,
+      "referenced_message": null,
+      "interaction": null,
+      "thread": null,
+      "components": [],
+      "sticker_items": [],
+      "guild_id": null,
+      "member": null
+    }
+  }
+}

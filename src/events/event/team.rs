@@ -1,8 +1,8 @@
+use crate::events::event::participant::Participant;
 use serde::{Deserialize, Serialize};
-use serenity::model::user::User;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct Team(Vec<User>);
+pub struct Team(Vec<Participant>);
 
 impl Team {}
 
