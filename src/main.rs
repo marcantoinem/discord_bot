@@ -1,10 +1,10 @@
 pub mod commands;
-pub mod events;
+pub mod slash;
 pub mod utils;
 
-use events::events::*;
 use serenity::{async_trait, model::prelude::*, prelude::*};
-use std::{env, fs, sync::Arc};
+use std::{env, fs::File, sync::Arc};
+use utils::events::*;
 
 struct Handler;
 
@@ -20,10 +20,10 @@ impl EventHandler for Handler {
         Events::update(&ctx, scheduled_event).await;
     }
     async fn ready(&self, ctx: Context, ready: Ready) {
-        utils::ready(&ctx, ready).await;
+        slash::ready(&ctx, ready).await;
     }
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
-        utils::interaction_create(&ctx, interaction).await;
+        slash::interaction_create(&ctx, interaction).await;
     }
 }
 
@@ -42,10 +42,11 @@ async fn main() {
     // Initialize the Arc RwLock which keep the data and refresh it.
     {
         let mut data = client.data.write().await;
-        let saved_data = match fs::read(PATH) {
+        let saved_data = match File::open(PATH) {
             Err(_) => Events::default(),
-            Ok(file_content) => {
-                bincode::deserialize(&file_content[..]).expect("File is probably corrupted.")
+            Ok(file) => {
+                let reader = std::io::BufReader::new(file);
+                serde_json::from_reader(reader).expect("File is probably corrupted.")
             }
         };
         data.insert::<EventsContainer>(Arc::new(RwLock::new(saved_data)));

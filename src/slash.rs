@@ -1,11 +1,11 @@
 use std::env;
 
 use crate::commands::{self};
-use crate::events::events::Events;
+use crate::utils::events::Events;
 use serenity::{builder::*, model::prelude::*, prelude::*};
 
 pub async fn ready(ctx: &Context, ready: Ready) {
-    Events::refresh(&ctx, &ready).await;
+    Events::refresh(ctx, &ready).await;
     println!("{} is connected!", ready.user.name);
 
     let guild_id = GuildId::new(
@@ -16,13 +16,14 @@ pub async fn ready(ctx: &Context, ready: Ready) {
     );
 
     let commands = guild_id
-        .set_application_commands(&ctx.http, vec![commands::refresh::register()])
-        .await;
-
-    println!(
-        "I now have the following guild slash commands: {:#?}",
-        commands
-    );
+        .set_application_commands(
+            &ctx.http,
+            vec![commands::refresh::register(), commands::join::register()],
+        )
+        .await
+        .unwrap();
+    println!("I now have the following guild slash commands:",);
+    commands.iter().for_each(|x| println!("{}", x.name));
 }
 
 pub async fn interaction_create(ctx: &Context, interaction: Interaction) {
@@ -30,7 +31,11 @@ pub async fn interaction_create(ctx: &Context, interaction: Interaction) {
         println!("Received command interaction: {}", command.data.name);
 
         let content = match command.data.name.as_str() {
-            "refresh" => Some(commands::refresh::run(&ctx, &command).await),
+            "refresh" => Some(commands::refresh::run(ctx, &command).await),
+            "join" => {
+                commands::join::run(ctx, &command).await.unwrap();
+                None
+            }
             _ => Some("not implemented :(".to_string()),
         };
 

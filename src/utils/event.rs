@@ -1,17 +1,15 @@
-use super::{msg::EventMessage, team::Team};
+use super::{msg::EventMessage, team::Teams};
 use serde::{Deserialize, Serialize};
 use serenity::{model::prelude::*, prelude::*};
-use std::num::NonZeroU64;
 
 // Trust me this is safe, unwraping an non zero u64 in NonZeroU64.
 
-pub const CHANNEL_ID: ChannelId =
-    ChannelId(unsafe { NonZeroU64::new_unchecked(1050254533537845288) });
+pub const CHANNEL_ID: ChannelId = ChannelId::new(1050254533537845288);
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Event {
-    pub teams: Vec<Team>,
-    pub event: ScheduledEvent,
+    pub teams: Teams,
+    pub scheduled_event: ScheduledEvent,
     pub msg: Message,
 }
 
@@ -31,28 +29,23 @@ impl Event {
 }
 
 pub struct EventBuilder {
-    teams: Vec<Team>,
-    event: Option<ScheduledEvent>,
+    teams: Teams,
+    scheduled_event: ScheduledEvent,
 }
 
 impl EventBuilder {
-    pub fn new() -> EventBuilder {
+    pub fn new(scheduled_event: &ScheduledEvent) -> EventBuilder {
         EventBuilder {
-            teams: vec![Team::default()],
-            event: None,
+            teams: Teams::default(),
+            scheduled_event: scheduled_event.clone(),
         }
     }
-    pub fn event(mut self, event: &ScheduledEvent) -> EventBuilder {
-        self.event = Some(event.clone());
-        self
-    }
     pub async fn build_and_send(self, ctx: &Context, channel_id: ChannelId) -> Option<Event> {
-        let event = self.event.unwrap();
-        let msg = EventMessage::new().event(&event);
+        let msg = EventMessage::new().event(&self.scheduled_event);
         match &msg.build_and_send(ctx, channel_id).await {
             Ok(message) => Some(Event {
                 teams: self.teams,
-                event,
+                scheduled_event: self.scheduled_event,
                 msg: message.clone(),
             }),
             Err(why) => {
