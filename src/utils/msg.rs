@@ -1,9 +1,7 @@
-use serenity::{
-    builder::{CreateEmbed, CreateEmbedFooter, CreateMessage, EditMessage},
-    model::prelude::*,
-    prelude::*,
-};
+use serenity::builder::{CreateEmbed, CreateEmbedFooter, CreateMessage, EditMessage};
+use serenity::{model::prelude::*, prelude::*};
 
+#[derive(Default)]
 pub struct EventMessage {
     title: String,
     description: String,
@@ -34,7 +32,7 @@ impl EventMessage {
                 "https://cdn.discordapp.com/guild-events/".to_owned()
                     + &scheduled_event.id.to_string()
                     + "/"
-                    + &image_id
+                    + image_id
                     + "?size=512",
             );
         }

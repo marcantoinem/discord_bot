@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::events::event::participant::Participant;
+use super::participant::Participant;
 use serde::{Deserialize, Serialize};
 use serenity::all::UserId;
 

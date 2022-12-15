@@ -1,11 +1,11 @@
 use std::env;
 
 use crate::commands::{self};
-use crate::events::events::Events;
+use crate::utils::events::Events;
 use serenity::{builder::*, model::prelude::*, prelude::*};
 
 pub async fn ready(ctx: &Context, ready: Ready) {
-    Events::refresh(&ctx, &ready).await;
+    Events::refresh(ctx, &ready).await;
     println!("{} is connected!", ready.user.name);
 
     let guild_id = GuildId::new(
@@ -31,9 +31,9 @@ pub async fn interaction_create(ctx: &Context, interaction: Interaction) {
         println!("Received command interaction: {}", command.data.name);
 
         let content = match command.data.name.as_str() {
-            "refresh" => Some(commands::refresh::run(&ctx, &command).await),
+            "refresh" => Some(commands::refresh::run(ctx, &command).await),
             "join" => {
-                commands::join::run(&ctx, &command).await.unwrap();
+                commands::join::run(ctx, &command).await.unwrap();
                 None
             }
             _ => Some("not implemented :(".to_string()),
