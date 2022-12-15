@@ -1,8 +1,4 @@
-use std::{
-    collections::HashMap,
-    fs::{self},
-    sync::Arc,
-};
+use std::{collections::HashMap, fs, sync::Arc};
 
 use crate::events::event::event::{Event, EventBuilder, CHANNEL_ID};
 use serde::{Deserialize, Serialize};
@@ -27,8 +23,7 @@ impl Events {
             .clone()
     }
     pub async fn add(ctx: &Context, scheduled_event: ScheduledEvent) {
-        let event = EventBuilder::new()
-            .event(&scheduled_event)
+        let event = EventBuilder::new(&scheduled_event)
             .build_and_send(&ctx, CHANNEL_ID)
             .await
             .unwrap();
@@ -64,14 +59,13 @@ impl Events {
             if let Some(event) = events.0.get(&scheduled_event.id).clone() {
                 let mut event = event.clone();
                 event.update(ctx, scheduled_event).await;
-                events.0.insert(event.event.id, event);
+                events.0.insert(event.scheduled_event.id, event);
             } else {
-                let event = EventBuilder::new()
-                    .event(&scheduled_event)
+                let event = EventBuilder::new(&scheduled_event)
                     .build_and_send(&ctx, CHANNEL_ID)
                     .await
                     .unwrap();
-                events.0.insert(event.event.id, event);
+                events.0.insert(event.scheduled_event.id, event);
             };
 
             let events = events.clone();
