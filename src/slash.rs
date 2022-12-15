@@ -1,3 +1,4 @@
+//! Slash commands are registered and handled here.
 use std::env;
 
 use crate::commands::{self};
@@ -14,12 +15,9 @@ pub async fn ready(ctx: &Context, ready: Ready) {
             .parse()
             .expect("GUILD_ID must be an integer"),
     );
-
+    let commands = vec![commands::refresh::register(), commands::join::register()];
     let commands = guild_id
-        .set_application_commands(
-            &ctx.http,
-            vec![commands::refresh::register(), commands::join::register()],
-        )
+        .set_application_commands(&ctx.http, commands)
         .await
         .unwrap();
     println!("I now have the following guild slash commands:",);

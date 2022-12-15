@@ -1,8 +1,8 @@
+//! Event represent an hackathon and the associated teams.
+
 use super::{msg::EventMessage, team::Teams};
 use serde::{Deserialize, Serialize};
 use serenity::{model::prelude::*, prelude::*};
-
-// Trust me this is safe, unwraping an non zero u64 in NonZeroU64.
 
 pub const CHANNEL_ID: ChannelId = ChannelId::new(1050254533537845288);
 
