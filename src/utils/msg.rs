@@ -1,3 +1,4 @@
+use super::event::EventBuilder;
 use serenity::builder::{CreateEmbed, CreateEmbedFooter, CreateMessage, EditMessage};
 use serenity::{model::prelude::*, prelude::*};
 
@@ -11,32 +12,41 @@ pub struct EventMessage {
 }
 
 impl EventMessage {
-    pub fn new() -> EventMessage {
-        EventMessage {
-            title: String::from(""),
-            description: String::from(""),
-            start_time: Timestamp::now(),
-            location: String::from(""),
-            image: None,
-        }
-    }
-    pub fn event(mut self, scheduled_event: &ScheduledEvent) -> EventMessage {
-        self.title = scheduled_event.name.clone();
-        self.description = scheduled_event.description.clone().unwrap_or_default();
-        self.start_time = scheduled_event.start_time;
-        if let Some(metadata) = &scheduled_event.metadata {
-            self.location = metadata.location.clone();
-        }
-        if let Some(image_id) = &scheduled_event.image {
-            self.image = Some(
+    pub fn new<E: Into<EventBuilder> + Clone>(event: &E) -> EventMessage {
+        let event: EventBuilder = event.clone().into();
+        let image = match &event.scheduled_event.image {
+            Some(image) => Some(
                 "https://cdn.discordapp.com/guild-events/".to_owned()
-                    + &scheduled_event.id.to_string()
+                    + &event.scheduled_event.id.to_string()
                     + "/"
-                    + image_id
+                    + &image
                     + "?size=512",
-            );
+            ),
+            None => None,
+        };
+        let title = event.scheduled_event.name.clone();
+        let description = event
+            .scheduled_event
+            .description
+            .clone()
+            .unwrap_or_default();
+        let start_time = event.scheduled_event.start_time;
+        let location = event
+            .scheduled_event
+            .metadata
+            .unwrap_or(ScheduledEventMetadata {
+                location: "".to_string(),
+            })
+            .location
+            .clone();
+
+        EventMessage {
+            title,
+            description,
+            start_time,
+            location,
+            image,
         }
-        self
     }
     pub async fn build_and_send(
         &self,

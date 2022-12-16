@@ -15,7 +15,8 @@ pub struct Event {
 
 impl Event {
     pub async fn update(&mut self, ctx: &Context, scheduled_event: ScheduledEvent) {
-        let msg = EventMessage::new().event(&scheduled_event);
+        self.scheduled_event = scheduled_event;
+        let msg = EventMessage::new(self);
         match &msg.build_and_edit(ctx, CHANNEL_ID, self.msg.id).await {
             Ok(msg) => self.msg = msg.clone(),
             Err(_) => match &msg.build_and_send(ctx, CHANNEL_ID).await {
@@ -28,9 +29,10 @@ impl Event {
     }
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct EventBuilder {
-    teams: Teams,
-    scheduled_event: ScheduledEvent,
+    pub teams: Teams,
+    pub scheduled_event: ScheduledEvent,
 }
 
 impl EventBuilder {
@@ -40,8 +42,12 @@ impl EventBuilder {
             scheduled_event: scheduled_event.clone(),
         }
     }
+    pub fn teams(mut self, teams: Teams) -> EventBuilder {
+        self.teams = teams;
+        self
+    }
     pub async fn build_and_send(self, ctx: &Context, channel_id: ChannelId) -> Option<Event> {
-        let msg = EventMessage::new().event(&self.scheduled_event);
+        let msg = EventMessage::new(&self);
         match &msg.build_and_send(ctx, channel_id).await {
             Ok(message) => Some(Event {
                 teams: self.teams,
@@ -52,6 +58,15 @@ impl EventBuilder {
                 println!("Error creating message: {:?}", why);
                 None
             }
+        }
+    }
+}
+
+impl Into<EventBuilder> for Event {
+    fn into(self) -> EventBuilder {
+        EventBuilder {
+            teams: self.teams,
+            scheduled_event: self.scheduled_event,
         }
     }
 }

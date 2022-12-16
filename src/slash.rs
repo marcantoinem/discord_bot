@@ -19,6 +19,7 @@ pub async fn ready(ctx: &Context, ready: Ready) {
         commands::refresh::register(),
         commands::join::register(),
         commands::setup::register(),
+        commands::new::register(),
     ];
     let commands = guild_id
         .set_application_commands(&ctx.http, commands)
@@ -34,6 +35,7 @@ pub async fn interaction_create(ctx: &Context, interaction: Interaction) {
 
         let content = match command.data.name.as_str() {
             "refresh" => Some(commands::refresh::run(ctx, &command).await),
+            "new" => Some(commands::new::run(ctx, &command).await),
             "join" => {
                 commands::join::run(ctx, &command).await.unwrap();
                 None

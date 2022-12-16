@@ -32,6 +32,15 @@ pub struct TeamId(u64);
 pub struct Teams {
     teams: HashMap<TeamId, Team>,
     participants: HashMap<UserId, TeamId>,
+    max_participants: Option<u32>,
+}
+
+impl Teams {
+    pub fn add_team<Text: Into<String>>(&mut self, name: Text) {
+        let team = Team::new(name, vec![]);
+        let team_id = TeamId(self.teams.len() as u64);
+        self.teams.insert(team_id, team);
+    }
 }
 
 impl Default for Teams {
@@ -43,6 +52,7 @@ impl Default for Teams {
         Teams {
             teams,
             participants,
+            max_participants: None,
         }
     }
 }

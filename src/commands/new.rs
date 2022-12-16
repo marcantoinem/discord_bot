@@ -1,5 +1,5 @@
 use crate::utils::events::Events;
-use serenity::{builder::*, model::prelude::*, prelude::*};
+use serenity::{all::CommandOptionType, builder::*, model::prelude::*, prelude::*};
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> String {
     if let Some(guild) = interaction.guild_id {
@@ -8,9 +8,15 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> String {
             Events::update(ctx, event).await;
         }
     }
-    "Refresh executed with success".to_string()
+    "Team created with success".to_string()
 }
 
 pub fn register() -> CreateCommand {
-    CreateCommand::new("refresh").description("Pull all events and refresh.")
+    CreateCommand::new("new")
+        .description("Create a new team.")
+        .add_option(CreateCommandOption::new(
+            CommandOptionType::String,
+            "name",
+            "new team name",
+        ))
 }
