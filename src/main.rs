@@ -3,8 +3,8 @@ pub mod slash;
 pub mod utils;
 
 use serenity::{async_trait, model::prelude::*, prelude::*};
-use std::{env, fs::File, sync::Arc};
-use utils::events::*;
+use std::{env, sync::Arc};
+use utils::{data::Data, events::*};
 
 struct Handler;
 
@@ -41,15 +41,11 @@ async fn main() {
 
     // Initialize the Arc RwLock which keep the data and refresh it.
     {
+        let saved_events = Events::from_file();
+        let saved_data = Data::from_file();
         let mut data = client.data.write().await;
-        let saved_data = match File::open(PATH) {
-            Err(_) => Events::default(),
-            Ok(file) => {
-                let reader = std::io::BufReader::new(file);
-                serde_json::from_reader(reader).expect("File is probably corrupted.")
-            }
-        };
-        data.insert::<EventsContainer>(Arc::new(RwLock::new(saved_data)));
+        data.insert::<Events>(Arc::new(RwLock::new(saved_events)));
+        data.insert::<Data>(Arc::new(RwLock::new(saved_data)));
     }
 
     // Finally, start a single shard, and start listening to events.

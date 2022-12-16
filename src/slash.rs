@@ -15,7 +15,11 @@ pub async fn ready(ctx: &Context, ready: Ready) {
             .parse()
             .expect("GUILD_ID must be an integer"),
     );
-    let commands = vec![commands::refresh::register(), commands::join::register()];
+    let commands = vec![
+        commands::refresh::register(),
+        commands::join::register(),
+        commands::setup::register(),
+    ];
     let commands = guild_id
         .set_application_commands(&ctx.http, commands)
         .await
@@ -32,6 +36,10 @@ pub async fn interaction_create(ctx: &Context, interaction: Interaction) {
             "refresh" => Some(commands::refresh::run(ctx, &command).await),
             "join" => {
                 commands::join::run(ctx, &command).await.unwrap();
+                None
+            }
+            "setup" => {
+                commands::setup::run(ctx, &command).await.unwrap();
                 None
             }
             _ => Some("not implemented :(".to_string()),
