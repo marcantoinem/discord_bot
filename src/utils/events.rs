@@ -1,11 +1,15 @@
-use std::{collections::HashMap, fs, sync::Arc};
+use std::{
+    collections::{hash_map::Iter, HashMap},
+    fs,
+    sync::Arc,
+};
 
 use super::{
     data::Data,
     event::{Event, EventBuilder},
 };
 use serde::{Deserialize, Serialize};
-use serenity::{model::prelude::*, prelude::*};
+use serenity::{builder::*, model::prelude::*, prelude::*};
 use std::fs::File;
 
 const PATH: &str = "saved_event.json";
@@ -18,7 +22,7 @@ impl TypeMapKey for Events {
 }
 
 impl Events {
-    async fn get_lock(ctx: &Context) -> Arc<RwLock<Events>> {
+    pub async fn get_lock(ctx: &Context) -> Arc<RwLock<Events>> {
         let data_read = ctx.data.read().await;
         data_read
             .get::<Events>()
@@ -106,5 +110,27 @@ impl Events {
                 }
             }
         }
+    }
+    pub fn get(&self, id: &ScheduledEventId) -> Option<Event> {
+        self.0.get(id).cloned()
+    }
+    pub fn iter(&self) -> Iter<'_, ScheduledEventId, Event> {
+        self.0.iter()
+    }
+    pub async fn read_events(ctx: &Context) -> Events {
+        let events_lock = Events::get_lock(ctx).await;
+        let events = events_lock.read().await;
+        events.clone()
+    }
+    pub async fn menu(ctx: &Context) -> CreateSelectMenu {
+        let events = Events::read_events(ctx).await;
+        let options = events
+            .iter()
+            .map(|(id, event)| {
+                CreateSelectMenuOption::new(event.scheduled_event.name.clone(), id.to_string())
+            })
+            .collect();
+        let select_menu = CreateSelectMenuKind::String { options };
+        CreateSelectMenu::new("events", select_menu)
     }
 }

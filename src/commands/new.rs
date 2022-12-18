@@ -14,9 +14,8 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> String {
 pub fn register() -> CreateCommand {
     CreateCommand::new("new")
         .description("Create a new team.")
-        .add_option(CreateCommandOption::new(
-            CommandOptionType::String,
-            "name",
-            "new team name",
-        ))
+        .add_option(
+            CreateCommandOption::new(CommandOptionType::String, "name", "new team name")
+                .required(true),
+        )
 }
