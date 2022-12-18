@@ -74,7 +74,8 @@ impl Events {
             let mut events = events_lock.write().await;
             if let Some(event) = events.0.get(&scheduled_event.id) {
                 let mut event = event.clone();
-                event.update(ctx, scheduled_event).await;
+                event.scheduled_event = scheduled_event;
+                event.update(ctx, hackathon_channel).await;
                 events.0.insert(event.scheduled_event.id, event);
             } else {
                 let event = EventBuilder::new(&scheduled_event)
@@ -83,6 +84,22 @@ impl Events {
                     .unwrap();
                 events.0.insert(event.scheduled_event.id, event);
             };
+            events.write_to_file();
+        }
+    }
+    pub async fn refresh_team(ctx: &Context, event: &Event) {
+        let Some(hackathon_channel) = Data::get_hackathon_channel(ctx).await else {
+            return;
+        };
+        let events_lock = Events::get_lock(ctx).await;
+        {
+            let mut events = events_lock.write().await;
+            events
+                .0
+                .entry(event.scheduled_event.id)
+                .and_modify(|e| *e = event.clone());
+            event.update(ctx, hackathon_channel).await;
+            events.0.insert(event.scheduled_event.id, event.clone());
             events.write_to_file();
         }
     }
@@ -113,6 +130,9 @@ impl Events {
     }
     pub fn get(&self, id: &ScheduledEventId) -> Option<Event> {
         self.0.get(id).cloned()
+    }
+    pub fn get_mut(&mut self, id: &ScheduledEventId) -> Option<&mut Event> {
+        self.0.get_mut(id)
     }
     pub fn iter(&self) -> Iter<'_, ScheduledEventId, Event> {
         self.0.iter()

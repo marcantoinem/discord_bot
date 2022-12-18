@@ -4,8 +4,6 @@ use super::{msg::EventMessage, team::Teams};
 use serde::{Deserialize, Serialize};
 use serenity::{model::prelude::*, prelude::*};
 
-pub const CHANNEL_ID: ChannelId = ChannelId::new(1050254533537845288);
-
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Event {
     pub teams: Teams,
@@ -14,13 +12,16 @@ pub struct Event {
 }
 
 impl Event {
-    pub async fn update(&mut self, ctx: &Context, scheduled_event: ScheduledEvent) {
-        self.scheduled_event = scheduled_event;
+    pub async fn update(&self, ctx: &Context, hackathon_channel: ChannelId) {
+        let mut event = self.clone();
         let msg = EventMessage::new(self);
-        match &msg.build_and_edit(ctx, CHANNEL_ID, self.msg.id).await {
-            Ok(msg) => self.msg = msg.clone(),
-            Err(_) => match &msg.build_and_send(ctx, CHANNEL_ID).await {
-                Ok(message) => self.msg = message.clone(),
+        match &msg
+            .build_and_edit(ctx, hackathon_channel, self.msg.id)
+            .await
+        {
+            Ok(msg) => event.msg = msg.clone(),
+            Err(_) => match &msg.build_and_send(ctx, hackathon_channel).await {
+                Ok(message) => event.msg = message.clone(),
                 Err(why) => {
                     println!("Error creating message: {:?}", why);
                 }

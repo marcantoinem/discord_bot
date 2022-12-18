@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use serenity::{
     all::{ScheduledEventId, UserId},
     builder::*,
-    prelude::Context,
+    prelude::*,
 };
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -53,7 +53,7 @@ impl fmt::Display for TeamId {
 pub struct Teams {
     teams: HashMap<TeamId, Team>,
     participants: HashMap<UserId, TeamId>,
-    max_participants: Option<u32>,
+    capacity: Option<u32>,
 }
 
 impl Teams {
@@ -71,6 +71,30 @@ impl Teams {
     pub fn get_participants_team(&self, id: &UserId) -> Option<Team> {
         let team_id = self.participants.get(id).cloned()?;
         self.get_team(&team_id)
+    }
+    pub fn add_participant(
+        &mut self,
+        team_id: TeamId,
+        participant: Participant,
+    ) -> Result<(), SerenityError> {
+        if let Some(old_team) = self.participants.get(&participant.id) {
+            self.teams.remove(old_team);
+        }
+        if let (Some(team), Some(capacity)) = (self.teams.get(&team_id), self.capacity) {
+            if team.team.len() >= capacity as usize {
+                return Err(SerenityError::Other(
+                    "L'équipe a atteint sa capacité maximale",
+                ));
+            }
+        }
+        self.participants
+            .entry(participant.id)
+            .and_modify(|x| *x = team_id.clone())
+            .or_insert(team_id.clone());
+        self.teams
+            .entry(team_id)
+            .and_modify(|x| x.team.push(participant));
+        Ok(())
     }
     pub async fn menu(ctx: &Context, event_id: ScheduledEventId) -> CreateSelectMenu {
         let events_lock = Events::get_lock(ctx).await;
@@ -95,15 +119,19 @@ impl Default for Teams {
         Teams {
             teams,
             participants,
-            max_participants: None,
+            capacity: None,
         }
     }
 }
 
 impl fmt::Display for Teams {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.teams.iter().fold(Ok(()), |result, (_, team)| {
-            result.and_then(|_| writeln!(f, "{}", team))
-        })
+        for (_, team) in self.teams.iter() {
+            writeln!(f, "{}", team)?;
+            team.team.iter().fold(Ok(()), |result, participant| {
+                result.and_then(|_| write!(f, "{} ", participant))
+            })?;
+        }
+        Ok(())
     }
 }

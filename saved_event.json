@@ -3,13 +3,20 @@
     "teams": {
       "teams": {
         "0": {
-          "name": "par défault",
-          "description": "",
-          "team": []
+          "name": "Par défault",
+          "description": "test",
+          "team": [
+            {
+              "id": "330450347661197313",
+              "name": "Lemark"
+            }
+          ]
         }
       },
-      "participants": {},
-      "max_participants": null
+      "participants": {
+        "330450347661197313": 0
+      },
+      "capacity": null
     },
     "scheduled_event": {
       "id": "1050937384155480124",
@@ -40,7 +47,7 @@
       "image": "210b9e09eb6c75b8bfa79db349fe4cc2"
     },
     "msg": {
-      "id": "1053197903935574066",
+      "id": "1054137010379567105",
       "channel_id": "1050254533537845288",
       "author": {
         "id": "931196986298888242",
@@ -54,8 +61,8 @@
         "member": null
       },
       "content": "",
-      "timestamp": "2022-12-16T06:32:27.769Z",
-      "edited_timestamp": "2022-12-18T05:28:44.216617Z",
+      "timestamp": "2022-12-18T20:44:08.193Z",
+      "edited_timestamp": "2022-12-18T21:00:59.781991Z",
       "tts": false,
       "mention_everyone": false,
       "mentions": [],
@@ -90,7 +97,7 @@
         {
           "author": null,
           "color": 15844367,
-          "description": "**par défault**:",
+          "description": "**Par défault**: test",
           "fields": [],
           "footer": null,
           "image": null,
@@ -126,13 +133,20 @@
     "teams": {
       "teams": {
         "0": {
-          "name": "par défault",
-          "description": "",
-          "team": []
+          "name": "Par défault",
+          "description": "test",
+          "team": [
+            {
+              "id": "330450347661197313",
+              "name": "Lemark"
+            }
+          ]
         }
       },
-      "participants": {},
-      "max_participants": null
+      "participants": {
+        "330450347661197313": 0
+      },
+      "capacity": null
     },
     "scheduled_event": {
       "id": "1050942451575173170",
@@ -163,7 +177,7 @@
       "image": "011d03afb5112b1a516a383bad8b8f57"
     },
     "msg": {
-      "id": "1053197904912863232",
+      "id": "1054137011210031205",
       "channel_id": "1050254533537845288",
       "author": {
         "id": "931196986298888242",
@@ -177,8 +191,8 @@
         "member": null
       },
       "content": "",
-      "timestamp": "2022-12-16T06:32:28.002Z",
-      "edited_timestamp": "2022-12-18T05:28:44.503232Z",
+      "timestamp": "2022-12-18T20:44:08.391Z",
+      "edited_timestamp": "2022-12-18T21:01:05.878520Z",
       "tts": false,
       "mention_everyone": false,
       "mentions": [],
@@ -213,7 +227,7 @@
         {
           "author": null,
           "color": 15844367,
-          "description": "**par défault**:",
+          "description": "**Par défault**: test",
           "fields": [],
           "footer": null,
           "image": null,
@@ -249,13 +263,13 @@
     "teams": {
       "teams": {
         "0": {
-          "name": "par défault",
-          "description": "",
+          "name": "Par défault",
+          "description": "test",
           "team": []
         }
       },
       "participants": {},
-      "max_participants": null
+      "capacity": null
     },
     "scheduled_event": {
       "id": "1050884052183437412",
@@ -286,7 +300,7 @@
       "image": "5b60b05fe92026575f771ff19dfd2e6c"
     },
     "msg": {
-      "id": "1053197901628715009",
+      "id": "1054137009695903844",
       "channel_id": "1050254533537845288",
       "author": {
         "id": "931196986298888242",
@@ -300,8 +314,8 @@
         "member": null
       },
       "content": "",
-      "timestamp": "2022-12-16T06:32:27.219Z",
-      "edited_timestamp": "2022-12-18T05:28:44.034009Z",
+      "timestamp": "2022-12-18T20:44:08.030Z",
+      "edited_timestamp": "2022-12-18T21:00:59.633372Z",
       "tts": false,
       "mention_everyone": false,
       "mentions": [],
@@ -336,7 +350,7 @@
         {
           "author": null,
           "color": 15844367,
-          "description": "**par défault**:",
+          "description": "**Par défault**: test",
           "fields": [],
           "footer": null,
           "image": null,
