@@ -265,10 +265,17 @@
         "0": {
           "name": "Par défault",
           "description": "test",
-          "team": []
+          "team": [
+            {
+              "id": "330450347661197313",
+              "name": "Lemark"
+            }
+          ]
         }
       },
-      "participants": {},
+      "participants": {
+        "330450347661197313": 0
+      },
       "capacity": null
     },
     "scheduled_event": {
