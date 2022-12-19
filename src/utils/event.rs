@@ -63,11 +63,11 @@ impl EventBuilder {
     }
 }
 
-impl Into<EventBuilder> for Event {
-    fn into(self) -> EventBuilder {
+impl From<Event> for EventBuilder {
+    fn from(event: Event) -> EventBuilder {
         EventBuilder {
-            teams: self.teams,
-            scheduled_event: self.scheduled_event,
+            teams: event.teams,
+            scheduled_event: event.scheduled_event,
         }
     }
 }

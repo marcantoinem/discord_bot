@@ -21,7 +21,7 @@ impl EventMessage {
                 "https://cdn.discordapp.com/guild-events/".to_owned()
                     + &event.scheduled_event.id.to_string()
                     + "/"
-                    + &image
+                    + image
                     + "?size=512",
             ),
             None => None,
@@ -40,8 +40,7 @@ impl EventMessage {
             .unwrap_or(ScheduledEventMetadata {
                 location: "".to_string(),
             })
-            .location
-            .clone();
+            .location;
 
         EventMessage {
             title,

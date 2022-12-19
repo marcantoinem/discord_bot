@@ -90,7 +90,7 @@ impl Teams {
         self.participants
             .entry(participant.id)
             .and_modify(|x| *x = team_id.clone())
-            .or_insert(team_id.clone());
+            .or_insert_with(|| team_id.clone());
         self.teams
             .entry(team_id)
             .and_modify(|x| x.team.push(participant));
