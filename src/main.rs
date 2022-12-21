@@ -32,7 +32,7 @@ async fn main() {
     // Configure the client with your Discord bot token in the environment.
     let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
 
-    let intents = GatewayIntents::non_privileged() | GatewayIntents::GUILD_SCHEDULED_EVENTS;
+    let intents = GatewayIntents::non_privileged() | GatewayIntents::GUILDS;
     // Build our client.
     let mut client = Client::builder(token, intents)
         .event_handler(Handler)

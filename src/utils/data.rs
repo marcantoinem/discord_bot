@@ -1,16 +1,15 @@
+use super::constants::DATA_PATH;
+use serde::{Deserialize, Serialize};
+use serenity::{all::ChannelId, prelude::*};
 use std::{
     fs::{self, File},
     sync::Arc,
 };
 
-use serde::{Deserialize, Serialize};
-use serenity::{all::ChannelId, prelude::*};
-
-const PATH: &str = "saved_data.json";
-
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct Data {
     hackathon_channel: Option<ChannelId>,
+    hackathon_category: Option<ChannelId>,
 }
 
 impl Data {
@@ -23,7 +22,7 @@ impl Data {
     }
     pub fn write_to_file(&self) {
         let data = serde_json::to_string_pretty(&self).expect("Serialization failed.");
-        fs::write(PATH, data).expect("Can't save data.");
+        fs::write(DATA_PATH, data).expect("Can't save data.");
     }
     pub async fn get_hackathon_channel(ctx: &Context) -> Option<ChannelId> {
         let lock = Data::get_lock(ctx).await;
@@ -36,8 +35,19 @@ impl Data {
         read.hackathon_channel = Some(new_hackathon_channel);
         read.write_to_file();
     }
+    pub async fn get_hackathon_category(ctx: &Context) -> Option<ChannelId> {
+        let lock = Data::get_lock(ctx).await;
+        let read = lock.read().await;
+        read.hackathon_category
+    }
+    pub async fn edit_hackathon_category(ctx: &Context, new_hackathon_category: ChannelId) {
+        let lock = Data::get_lock(ctx).await;
+        let mut read = lock.write().await;
+        read.hackathon_category = Some(new_hackathon_category);
+        read.write_to_file();
+    }
     pub fn from_file() -> Data {
-        match File::open(PATH) {
+        match File::open(DATA_PATH) {
             Err(_) => Data::default(),
             Ok(file) => {
                 let reader = std::io::BufReader::new(file);

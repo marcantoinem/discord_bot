@@ -1,5 +1,6 @@
 //! These are all the utils to represent multiple hackathons.
 
+pub mod constants;
 pub mod data;
 pub mod event;
 pub mod events;

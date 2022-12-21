@@ -11,59 +11,66 @@ use crate::utils::{
     traits::SendOrEdit,
 };
 
-pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+async fn select_event(
+    ctx: &Context,
+    interaction: &CommandInteraction,
+) -> Result<(ComponentInteraction, ScheduledEventId), serenity::Error> {
     let menu = Events::menu(ctx).await;
-
     CreateInteractionResponseMessage::new()
         .select_menu(menu)
         .content("Sélectionnez l'événement que vous voulez rejoindre.")
         .ephemeral(true)
         .build_and_send(ctx, interaction.id, &interaction.token)
         .await?;
-    let Some(interaction) = ComponentInteractionCollector::new(&ctx.shard)
-        .collect_single()
+    let interaction = ComponentInteractionCollector::new(&ctx.shard)
+        .next()
         .await
-        else {
-            return Err(SerenityError::Other("Event selection failed."));
-        };
-    let ComponentInteractionDataKind::StringSelect { values } = interaction.data.kind else {
+        .ok_or(SerenityError::Other("Event selection failed."))?;
+    let ComponentInteractionDataKind::StringSelect { values } = &interaction.data.kind else {
             return Err(SerenityError::Other("Event selection failed."));
     };
     let event_id = ScheduledEventId(values[0].parse::<NonZeroU64>().unwrap());
-    let menu = Teams::menu(ctx, event_id).await;
+    Ok((interaction, event_id))
+}
+
+async fn select_team(
+    ctx: &Context,
+    interaction: &ComponentInteraction,
+    event_id: &ScheduledEventId,
+) -> Result<(ComponentInteraction, TeamId), serenity::Error> {
+    let menu = Teams::menu(ctx, *event_id).await;
     CreateInteractionResponseMessage::new()
         .content("Sélectionnez l'équipe que vous voulez rejoindre.")
         .components(vec![CreateActionRow::SelectMenu(menu)])
         .build_and_edit(ctx, interaction.id, &interaction.token)
         .await?;
-
     let interaction = ComponentInteractionCollector::new(&ctx.shard)
-        .collect_single()
-        .await;
-    let Some(interaction) = interaction else {
-        return Err(SerenityError::Other("Team selection failed."));
-    };
-    let ComponentInteractionDataKind::StringSelect { values } = interaction.data.kind else {
+        .next()
+        .await
+        .ok_or(SerenityError::Other("Team selection failed."))?;
+    let ComponentInteractionDataKind::StringSelect { values } = &interaction.data.kind else {
         return Err(SerenityError::Other("Team selection failed."));
     };
     let team_id = TeamId(values[0].parse::<u64>().unwrap());
-    let event = {
-        let events_lock = Events::get_lock(ctx).await;
-        let events = events_lock.read().await;
-        events.get(&event_id)
-    };
-    let Some(mut event) = event else {
-        return Err(SerenityError::Other("Event joining failed."));
-    };
-    let Some(team) = event.teams.get_team(&team_id) else {
-        return Err(SerenityError::Other("Event joining failed."));
-    };
+    Ok((interaction, team_id))
+}
+
+pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+    let (interaction, event_id) = select_event(ctx, interaction).await?;
+    let (interaction, team_id) = select_team(ctx, &interaction, &event_id).await?;
+    let mut event = Events::get(ctx, &event_id)
+        .await
+        .ok_or(SerenityError::Other("Event joining failed."))?;
+    let team = event
+        .teams
+        .get_team(&team_id)
+        .ok_or(SerenityError::Other("Event joining failed."))?;
     let participant = Participant::from_user(interaction.user);
     let msg = match event.teams.add_participant(team_id, participant) {
         Ok(_) => format! {"Vous avez été rajouté à l'équipe: {}", team.name},
         Err(error) => format! {"Vous n'avez pas été rajouté à l'équipe: {}", error},
     };
-    Events::refresh_team(ctx, &event).await;
+    Events::refresh_event(ctx, &event).await;
     CreateInteractionResponseMessage::new()
         .content(msg)
         .components(vec![])

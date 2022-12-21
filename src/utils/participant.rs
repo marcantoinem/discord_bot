@@ -20,6 +20,6 @@ impl Participant {
 
 impl fmt::Display for Participant {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.name)
+        write!(f, "{}", self.id.mention())
     }
 }

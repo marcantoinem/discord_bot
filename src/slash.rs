@@ -35,7 +35,10 @@ pub async fn interaction_create(ctx: &Context, interaction: Interaction) {
 
         let content = match command.data.name.as_str() {
             "refresh" => Some(commands::refresh::run(ctx, &command).await),
-            "new" => Some(commands::new::run(ctx, &command).await),
+            "new" => {
+                commands::new::run(ctx, &command).await.unwrap();
+                None
+            }
             "join" => {
                 commands::join::run(ctx, &command).await.unwrap();
                 None

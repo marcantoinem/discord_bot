@@ -5,14 +5,13 @@ use std::{
 };
 
 use super::{
+    constants::EVENTS_PATH,
     data::Data,
     event::{Event, EventBuilder},
 };
 use serde::{Deserialize, Serialize};
 use serenity::{builder::*, model::prelude::*, prelude::*};
 use std::fs::File;
-
-const PATH: &str = "saved_event.json";
 
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct Events(HashMap<ScheduledEventId, Event>);
@@ -21,19 +20,52 @@ impl TypeMapKey for Events {
     type Value = Arc<RwLock<Events>>;
 }
 
+/// Private function for events
 impl Events {
-    pub async fn get_lock(ctx: &Context) -> Arc<RwLock<Events>> {
+    fn write_to_file(&self) {
+        let events = self.clone();
+        let data = serde_json::to_string_pretty(&events).expect("Serialization failed.");
+        fs::write(EVENTS_PATH, data).expect("Can't save data.");
+    }
+    async fn read_events(ctx: &Context) -> Events {
+        let events_lock = Events::get_lock(ctx).await;
+        let events = events_lock.read().await;
+        events.clone()
+    }
+    async fn get_lock(ctx: &Context) -> Arc<RwLock<Events>> {
         let data_read = ctx.data.read().await;
         data_read
             .get::<Events>()
             .expect("Expected EventsCounter in data.")
             .clone()
     }
-    fn write_to_file(&self) {
-        let events = self.clone();
-        let data = serde_json::to_string_pretty(&events).expect("Serialization failed.");
-        fs::write(PATH, data).expect("Can't save data.");
+    pub fn from_file() -> Events {
+        match File::open(EVENTS_PATH) {
+            Err(_) => Events::default(),
+            Ok(file) => {
+                let reader = std::io::BufReader::new(file);
+                match serde_json::from_reader(reader) {
+                    Err(_) => Events::default(),
+                    Ok(events) => events,
+                }
+            }
+        }
     }
+    pub async fn get(ctx: &Context, id: &ScheduledEventId) -> Option<Event> {
+        let events_lock = Events::get_lock(ctx).await;
+        let events = events_lock.read().await;
+        events.0.get(id).cloned()
+    }
+    pub fn get_mut(&mut self, id: &ScheduledEventId) -> Option<&mut Event> {
+        self.0.get_mut(id)
+    }
+    pub fn iter(&self) -> Iter<'_, ScheduledEventId, Event> {
+        self.0.iter()
+    }
+}
+
+/// Function which use Events
+impl Events {
     pub async fn add(ctx: &Context, scheduled_event: ScheduledEvent) {
         let Some(hackathon_channel) = Data::get_hackathon_channel(ctx).await else {
             return;
@@ -53,7 +85,6 @@ impl Events {
     }
     pub async fn delete(ctx: &Context, scheduled_event: ScheduledEvent) {
         let events_lock = Events::get_lock(ctx).await;
-
         {
             let mut events = events_lock.write().await;
             if let Some(event) = events.0.get(&scheduled_event.id) {
@@ -87,7 +118,7 @@ impl Events {
             events.write_to_file();
         }
     }
-    pub async fn refresh_team(ctx: &Context, event: &Event) {
+    pub async fn refresh_event(ctx: &Context, event: &Event) {
         let Some(hackathon_channel) = Data::get_hackathon_channel(ctx).await else {
             return;
         };
@@ -115,32 +146,6 @@ impl Events {
                 Events::update(ctx, event).await;
             }
         }
-    }
-    pub fn from_file() -> Events {
-        match File::open(PATH) {
-            Err(_) => Events::default(),
-            Ok(file) => {
-                let reader = std::io::BufReader::new(file);
-                match serde_json::from_reader(reader) {
-                    Err(_) => Events::default(),
-                    Ok(events) => events,
-                }
-            }
-        }
-    }
-    pub fn get(&self, id: &ScheduledEventId) -> Option<Event> {
-        self.0.get(id).cloned()
-    }
-    pub fn get_mut(&mut self, id: &ScheduledEventId) -> Option<&mut Event> {
-        self.0.get_mut(id)
-    }
-    pub fn iter(&self) -> Iter<'_, ScheduledEventId, Event> {
-        self.0.iter()
-    }
-    pub async fn read_events(ctx: &Context) -> Events {
-        let events_lock = Events::get_lock(ctx).await;
-        let events = events_lock.read().await;
-        events.clone()
     }
     pub async fn menu(ctx: &Context) -> CreateSelectMenu {
         let events = Events::read_events(ctx).await;

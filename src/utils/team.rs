@@ -6,7 +6,7 @@ use std::{
 use super::{events::Events, participant::Participant};
 use serde::{Deserialize, Serialize};
 use serenity::{
-    all::{ScheduledEventId, UserId},
+    all::{ChannelId, ScheduledEventId, UserId},
     builder::*,
     prelude::*,
 };
@@ -16,21 +16,25 @@ pub struct Team {
     pub name: String,
     description: String,
     team: Vec<Participant>,
+    text_channel: ChannelId,
+    vocal_channel: ChannelId,
 }
 
 impl Team {
-    pub fn new<Text: Into<String>>(name: Text, description: Text, team: Vec<Participant>) -> Team {
+    pub fn new<Text: Into<String>>(
+        name: Text,
+        description: Text,
+        team: Vec<Participant>,
+        text_channel: ChannelId,
+        vocal_channel: ChannelId,
+    ) -> Team {
         Team {
             name: name.into(),
             description: description.into(),
             team,
+            text_channel,
+            vocal_channel,
         }
-    }
-}
-
-impl Default for Team {
-    fn default() -> Self {
-        Team::new("Par défault", "test", vec![])
     }
 }
 
@@ -57,8 +61,14 @@ pub struct Teams {
 }
 
 impl Teams {
-    pub fn add_team<Text: Into<String>>(&mut self, name: Text, description: Text) {
-        let team = Team::new(name, description, vec![]);
+    pub fn add_team<Text: Into<String>>(
+        &mut self,
+        name: Text,
+        description: Text,
+        text_channel: ChannelId,
+        vocal_channel: ChannelId,
+    ) {
+        let team = Team::new(name, description, vec![], text_channel, vocal_channel);
         let team_id = TeamId(self.teams.len() as u64);
         self.teams.insert(team_id, team);
     }
@@ -97,9 +107,7 @@ impl Teams {
         Ok(())
     }
     pub async fn menu(ctx: &Context, event_id: ScheduledEventId) -> CreateSelectMenu {
-        let events_lock = Events::get_lock(ctx).await;
-        let events = events_lock.read().await;
-        let event = events.get(&event_id).unwrap();
+        let event = Events::get(ctx, &event_id).await.unwrap();
         let options = event
             .teams
             .iter()
@@ -112,9 +120,7 @@ impl Teams {
 
 impl Default for Teams {
     fn default() -> Self {
-        let default_team = Team::default();
-        let mut teams = HashMap::new();
-        teams.insert(TeamId(0), default_team);
+        let teams = HashMap::new();
         let participants = HashMap::new();
         Teams {
             teams,
@@ -128,9 +134,11 @@ impl fmt::Display for Teams {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for (_, team) in self.teams.iter() {
             writeln!(f, "{}", team)?;
+            write!(f, "Participants: ")?;
             team.team.iter().fold(Ok(()), |result, participant| {
                 result.and_then(|_| write!(f, "{} ", participant))
             })?;
+            writeln!(f, "")?;
         }
         Ok(())
     }
