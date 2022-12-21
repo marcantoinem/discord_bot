@@ -16,39 +16,13 @@ pub struct EventMessage {
 impl EventMessage {
     pub fn new<E: Into<EventBuilder> + Clone>(event: &E) -> EventMessage {
         let event: EventBuilder = event.clone().into();
-        let image = match &event.scheduled_event.image {
-            Some(image) => Some(
-                "https://cdn.discordapp.com/guild-events/".to_owned()
-                    + &event.scheduled_event.id.to_string()
-                    + "/"
-                    + image
-                    + "?size=512",
-            ),
-            None => None,
-        };
-        let teams = event.teams;
-        let title = event.scheduled_event.name.clone();
-        let description = event
-            .scheduled_event
-            .description
-            .clone()
-            .unwrap_or_default();
-        let start_time = event.scheduled_event.start_time;
-        let location = event
-            .scheduled_event
-            .metadata
-            .unwrap_or(ScheduledEventMetadata {
-                location: "".to_string(),
-            })
-            .location;
-
         EventMessage {
-            title,
-            description,
-            start_time,
-            location,
-            teams,
-            image,
+            title: event.name,
+            description: event.description,
+            start_time: event.start_time,
+            location: event.location,
+            teams: event.teams,
+            image: event.image,
         }
     }
     pub fn team(mut self, teams: Teams) -> EventMessage {

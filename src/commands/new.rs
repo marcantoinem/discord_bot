@@ -64,7 +64,6 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
         .category(category)
         .execute(ctx, guild_id)
         .await?;
-    println!("{:?}", audio_channel);
     event
         .teams
         .add_team(name, description, text_channel.id, audio_channel.id);

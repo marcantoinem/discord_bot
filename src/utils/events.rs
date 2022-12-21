@@ -87,10 +87,15 @@ impl Events {
         let events_lock = Events::get_lock(ctx).await;
         {
             let mut events = events_lock.write().await;
-            if let Some(event) = events.0.get(&scheduled_event.id) {
-                if let Err(why) = event.msg.delete(ctx).await {
-                    println!("An error occurred while running the client: {:?}", why);
-                }
+            let Some(event) = events.0.get(&scheduled_event.id) else {
+                return;
+            };
+            if let Err(why) = ctx
+                .http
+                .delete_message(event.channel_id, event.msg_id, None)
+                .await
+            {
+                println!("An error occurred while running the client: {:?}", why);
             }
             events.0.remove(&scheduled_event.id);
             events.write_to_file();
@@ -104,16 +109,15 @@ impl Events {
         {
             let mut events = events_lock.write().await;
             if let Some(event) = events.0.get(&scheduled_event.id) {
-                let mut event = event.clone();
-                event.scheduled_event = scheduled_event;
+                let event = event.clone();
                 event.update(ctx, hackathon_channel).await;
-                events.0.insert(event.scheduled_event.id, event);
+                events.0.insert(scheduled_event.id, event);
             } else {
                 let event = EventBuilder::new(&scheduled_event)
                     .build_and_send(ctx, hackathon_channel)
                     .await
                     .unwrap();
-                events.0.insert(event.scheduled_event.id, event);
+                events.0.insert(scheduled_event.id, event);
             };
             events.write_to_file();
         }
@@ -125,12 +129,9 @@ impl Events {
         let events_lock = Events::get_lock(ctx).await;
         {
             let mut events = events_lock.write().await;
-            events
-                .0
-                .entry(event.scheduled_event.id)
-                .and_modify(|e| *e = event.clone());
+            events.0.entry(event.id).and_modify(|e| *e = event.clone());
             event.update(ctx, hackathon_channel).await;
-            events.0.insert(event.scheduled_event.id, event.clone());
+            events.0.insert(event.id, event.clone());
             events.write_to_file();
         }
     }
@@ -151,9 +152,7 @@ impl Events {
         let events = Events::read_events(ctx).await;
         let options = events
             .iter()
-            .map(|(id, event)| {
-                CreateSelectMenuOption::new(event.scheduled_event.name.clone(), id.to_string())
-            })
+            .map(|(id, event)| CreateSelectMenuOption::new(event.name.clone(), id.to_string()))
             .collect();
         let select_menu = CreateSelectMenuKind::String { options };
         CreateSelectMenu::new("events", select_menu)
