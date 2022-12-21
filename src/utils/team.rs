@@ -82,6 +82,9 @@ impl Teams {
         let team_id = self.participants.get(id).cloned()?;
         self.get_team(&team_id)
     }
+    pub fn len(&self) -> usize {
+        self.teams.len()
+    }
     pub fn add_participant(
         &mut self,
         team_id: TeamId,
@@ -108,7 +111,7 @@ impl Teams {
     }
     pub async fn menu(ctx: &Context, event_id: ScheduledEventId) -> CreateSelectMenu {
         let event = Events::get(ctx, &event_id).await.unwrap();
-        let options = event
+        let options: Vec<CreateSelectMenuOption> = event
             .teams
             .iter()
             .map(|(id, team)| CreateSelectMenuOption::new(team.name.clone(), id.to_string()))

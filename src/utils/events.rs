@@ -157,4 +157,17 @@ impl Events {
         let select_menu = CreateSelectMenuKind::String { options };
         CreateSelectMenu::new("events", select_menu)
     }
+    pub async fn menu_nonzero_team(ctx: &Context) -> Option<CreateSelectMenu> {
+        let events = Events::read_events(ctx).await;
+        let options: Vec<CreateSelectMenuOption> = events
+            .iter()
+            .filter(|(_, event)| event.teams.len() > 0)
+            .map(|(id, event)| CreateSelectMenuOption::new(event.name.clone(), id.to_string()))
+            .collect();
+        if options.len() == 0 {
+            return None;
+        }
+        let select_menu = CreateSelectMenuKind::String { options };
+        Some(CreateSelectMenu::new("events", select_menu))
+    }
 }

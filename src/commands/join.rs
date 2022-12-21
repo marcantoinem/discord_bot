@@ -15,7 +15,13 @@ async fn select_event(
     ctx: &Context,
     interaction: &CommandInteraction,
 ) -> Result<(ComponentInteraction, ScheduledEventId), serenity::Error> {
-    let menu = Events::menu(ctx).await;
+    let Some(menu) = Events::menu_nonzero_team(ctx).await else {
+        CreateInteractionResponseMessage::new()
+            .content("Veuillez créer une équipe avant d'essayer de rejoindre une équipe.")
+            .build_and_send(ctx, interaction.id, &interaction.token)
+            .await?;
+        return Err(SerenityError::Other("No events with team."));
+    };
     CreateInteractionResponseMessage::new()
         .select_menu(menu)
         .content("Sélectionnez l'événement que vous voulez rejoindre.")

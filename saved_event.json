@@ -1,27 +1,4 @@
 {
-  "1050884052183437412": {
-    "teams": {
-      "teams": {
-        "0": {
-          "name": "Une équipe",
-          "description": "Nous avons une description",
-          "team": [],
-          "text_channel": "1054981221639262248",
-          "vocal_channel": "1054981222369071134"
-        }
-      },
-      "participants": {},
-      "capacity": null
-    },
-    "id": "1050884052183437412",
-    "name": "Math",
-    "description": "Let epsilon be negative.",
-    "image": "https://cdn.discordapp.com/guild-events/1050884052183437412/5b60b05fe92026575f771ff19dfd2e6c?size=512",
-    "start_time": "2022-12-15T22:00:00Z",
-    "location": "Somewhere existing or not",
-    "msg_id": "1054980526341103687",
-    "channel_id": "1050254533537845288"
-  },
   "1050942451575173170": {
     "teams": {
       "teams": {},
@@ -50,6 +27,23 @@
     "start_time": "2022-12-29T22:30:00Z",
     "location": "Uganda",
     "msg_id": "1054980527221903421",
+    "channel_id": "1050254533537845288"
+  },
+  "1050884052183437412": {
+    "teams": {
+      "teams": {},
+      "participants": {
+        "330450347661197313": 0
+      },
+      "capacity": null
+    },
+    "id": "1050884052183437412",
+    "name": "Math",
+    "description": "Let epsilon be negative.",
+    "image": "https://cdn.discordapp.com/guild-events/1050884052183437412/5b60b05fe92026575f771ff19dfd2e6c?size=512",
+    "start_time": "2022-12-15T22:00:00Z",
+    "location": "Somewhere existing or not",
+    "msg_id": "1054980526341103687",
     "channel_id": "1050254533537845288"
   }
 }
