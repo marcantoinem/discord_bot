@@ -1,13 +1,17 @@
-use super::constants::DATA_PATH;
 use serde::{Deserialize, Serialize};
-use serenity::{all::ChannelId, prelude::*};
+use serenity::{
+    all::{ChannelId, GuildId},
+    prelude::*,
+};
 use std::{
     fs::{self, File},
+    path::Path,
     sync::Arc,
 };
 
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct Preference {
+    pub guild_id: GuildId,
     hackathon_channel: Option<ChannelId>,
     hackathon_category: Option<ChannelId>,
 }
@@ -22,7 +26,8 @@ impl Preference {
     }
     pub fn write_to_file(&self) {
         let data = serde_json::to_string_pretty(&self).expect("Serialization failed.");
-        fs::write(DATA_PATH, data).expect("Can't save data.");
+        let path = "cache/".to_owned() + &self.guild_id.to_string() + "_saved_preference.json";
+        fs::write(path, data).expect("Can't save data.");
     }
     pub async fn get_hackathon_channel(ctx: &Context) -> Option<ChannelId> {
         let lock = Preference::get_lock(ctx).await;
@@ -46,14 +51,14 @@ impl Preference {
         read.hackathon_category = Some(new_hackathon_category);
         read.write_to_file();
     }
-    pub fn from_file() -> Preference {
-        match File::open(DATA_PATH) {
-            Err(_) => Preference::default(),
+    pub fn from_file<T: AsRef<Path>>(path: T) -> Option<Preference> {
+        match File::open(path) {
+            Err(_) => None,
             Ok(file) => {
                 let reader = std::io::BufReader::new(file);
                 match serde_json::from_reader(reader) {
-                    Err(_) => Preference::default(),
-                    Ok(events) => events,
+                    Err(_) => None,
+                    Ok(preference) => Some(preference),
                 }
             }
         }

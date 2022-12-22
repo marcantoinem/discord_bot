@@ -1,67 +1,66 @@
 use std::{
     collections::{hash_map::Iter, HashMap},
     fs,
+    path::Path,
     sync::Arc,
 };
 
 use super::{
-    constants::EVENTS_PATH,
     event::{Event, EventBuilder},
     preference::Preference,
+    servers::ServerEvents,
 };
 use serde::{Deserialize, Serialize};
 use serenity::{builder::*, model::prelude::*, prelude::*};
 use std::fs::File;
 
-#[derive(Serialize, Deserialize, Clone, Debug, Default)]
-pub struct Events(HashMap<ScheduledEventId, Event>);
-
-impl TypeMapKey for Events {
-    type Value = Arc<RwLock<Events>>;
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct Events {
+    pub guild_id: GuildId,
+    map: HashMap<ScheduledEventId, Event>,
 }
 
 /// Private function for events
 impl Events {
+    pub fn new(guild_id: GuildId) -> Events {
+        Events {
+            guild_id,
+            map: HashMap::new(),
+        }
+    }
     fn write_to_file(&self) {
         let events = self.clone();
         let data = serde_json::to_string_pretty(&events).expect("Serialization failed.");
-        // let event_path = EVENTS_PATH + events. + "_saved_event.json";
-        fs::write(EVENTS_PATH, data).expect("Can't save data.");
+        let event_path = "cache/".to_owned() + &events.guild_id.to_string() + "saved_event.json";
+        fs::write(event_path, data).expect("Can't save data.");
     }
     async fn read_events(ctx: &Context) -> Events {
-        let events_lock = Events::get_lock(ctx).await;
+        let events_lock = ServerEvents::get_lock(ctx).await;
         let events = events_lock.read().await;
         events.clone()
     }
-    async fn get_lock(ctx: &Context) -> Arc<RwLock<Events>> {
-        let data_read = ctx.data.read().await;
-        data_read
-            .get::<Events>()
-            .expect("Expected EventsCounter in data.")
-            .clone()
-    }
-    pub fn from_file() -> Events {
-        match File::open(EVENTS_PATH) {
-            Err(_) => Events::default(),
+    pub fn from_file<T: AsRef<Path>>(path: T) -> Option<Events> {
+        match File::open(path) {
+            Err(_) => None,
             Ok(file) => {
                 let reader = std::io::BufReader::new(file);
                 match serde_json::from_reader(reader) {
-                    Err(_) => Events::default(),
+                    Err(_) => None,
                     Ok(events) => events,
                 }
             }
         }
     }
     pub async fn get(ctx: &Context, id: &ScheduledEventId) -> Option<Event> {
-        let events_lock = Events::get_lock(ctx).await;
+        let events_lock = ServerEvents::get_lock(ctx).await;
         let events = events_lock.read().await;
-        events.0.get(id).cloned()
+        events.map.get(id).cloned()
     }
     pub fn get_mut(&mut self, id: &ScheduledEventId) -> Option<&mut Event> {
-        self.0.get_mut(id)
+        self.map.get_mut(id)
     }
     pub fn iter(&self) -> Iter<'_, ScheduledEventId, Event> {
-        self.0.iter()
+        self.map.iter()
     }
 }
 
@@ -76,19 +75,19 @@ impl Events {
             .await
             .unwrap();
 
-        let events_lock = Events::get_lock(ctx).await;
+        let events_lock = ServerEvents::get_lock(ctx).await;
 
         {
             let mut events = events_lock.write().await;
-            events.0.insert(scheduled_event.id, event);
+            events.map.insert(scheduled_event.id, event);
             events.write_to_file();
         }
     }
     pub async fn delete(ctx: &Context, scheduled_event: ScheduledEvent) {
-        let events_lock = Events::get_lock(ctx).await;
+        let events_lock = ServerEvents::get_lock(ctx).await;
         {
             let mut events = events_lock.write().await;
-            let Some(event) = events.0.get(&scheduled_event.id) else {
+            let Some(event) = events.map.get(&scheduled_event.id) else {
                 return;
             };
             if let Err(why) = ctx
@@ -98,7 +97,7 @@ impl Events {
             {
                 println!("An error occurred while running the client: {:?}", why);
             }
-            events.0.remove(&scheduled_event.id);
+            events.map.remove(&scheduled_event.id);
             events.write_to_file();
         }
     }
@@ -106,19 +105,19 @@ impl Events {
         let Some(hackathon_channel) = Preference::get_hackathon_channel(ctx).await else {
             return;
         };
-        let events_lock = Events::get_lock(ctx).await;
+        let events_lock = ServerEvents::get_lock(ctx).await;
         {
             let mut events = events_lock.write().await;
-            if let Some(event) = events.0.get(&scheduled_event.id) {
+            if let Some(event) = events.map.get(&scheduled_event.id) {
                 let event = event.clone();
                 event.update(ctx, hackathon_channel).await;
-                events.0.insert(scheduled_event.id, event);
+                events.map.insert(scheduled_event.id, event);
             } else {
                 let event = EventBuilder::new(&scheduled_event)
                     .build_and_send(ctx, hackathon_channel)
                     .await
                     .unwrap();
-                events.0.insert(scheduled_event.id, event);
+                events.map.insert(scheduled_event.id, event);
             };
             events.write_to_file();
         }
@@ -127,12 +126,15 @@ impl Events {
         let Some(hackathon_channel) = Preference::get_hackathon_channel(ctx).await else {
             return;
         };
-        let events_lock = Events::get_lock(ctx).await;
+        let events_lock = ServerEvents::get_lock(ctx).await;
         {
             let mut events = events_lock.write().await;
-            events.0.entry(event.id).and_modify(|e| *e = event.clone());
+            events
+                .map
+                .entry(event.id)
+                .and_modify(|e| *e = event.clone());
             event.update(ctx, hackathon_channel).await;
-            events.0.insert(event.id, event.clone());
+            events.map.insert(event.id, event.clone());
             events.write_to_file();
         }
     }
