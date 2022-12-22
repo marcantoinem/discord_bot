@@ -1,32 +1,26 @@
 //! Slash commands are registered and handled here.
-use std::env;
 
 use crate::commands::{self};
 use crate::utils::events::Events;
 use serenity::{builder::*, model::prelude::*, prelude::*};
 
 pub async fn ready(ctx: &Context, ready: Ready) {
-    Events::refresh(ctx, &ready).await;
-    println!("{} is connected!", ready.user.name);
-
-    let guild_id = GuildId::new(
-        env::var("GUILD_ID")
-            .expect("Expected GUILD_ID in environment")
-            .parse()
-            .expect("GUILD_ID must be an integer"),
-    );
-    let commands = vec![
-        commands::refresh::register(),
-        commands::join::register(),
-        commands::setup::register(),
-        commands::new::register(),
-    ];
-    let commands = guild_id
-        .set_application_commands(&ctx.http, commands)
-        .await
-        .unwrap();
-    println!("I now have the following guild slash commands:",);
-    commands.iter().for_each(|x| println!("{}", x.name));
+    for guild_id in ready.guilds.iter().map(|guild| guild.id) {
+        Events::refresh(ctx, &ready).await;
+        println!("{} is connected in {:?}!", ready.user.name, ready.guilds);
+        let commands = vec![
+            commands::refresh::register(),
+            commands::join::register(),
+            commands::setup::register(),
+            commands::new::register(),
+        ];
+        let commands = guild_id
+            .set_application_commands(&ctx.http, commands)
+            .await
+            .unwrap();
+        println!("I now have the following guild slash commands:",);
+        commands.iter().for_each(|x| println!("{}", x.name));
+    }
 }
 
 pub async fn interaction_create(ctx: &Context, interaction: Interaction) {

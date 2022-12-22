@@ -6,7 +6,7 @@ use std::{
 use super::{events::Events, participant::Participant};
 use serde::{Deserialize, Serialize};
 use serenity::{
-    all::{ChannelId, ScheduledEventId, UserId},
+    all::{ChannelId, ScheduledEventId},
     builder::*,
     prelude::*,
 };
@@ -56,7 +56,6 @@ impl fmt::Display for TeamId {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Teams {
     teams: HashMap<TeamId, Team>,
-    participants: HashMap<UserId, TeamId>,
     capacity: Option<u32>,
 }
 
@@ -78,10 +77,6 @@ impl Teams {
     pub fn get_team(&self, id: &TeamId) -> Option<Team> {
         self.teams.get(id).cloned()
     }
-    pub fn get_participants_team(&self, id: &UserId) -> Option<Team> {
-        let team_id = self.participants.get(id).cloned()?;
-        self.get_team(&team_id)
-    }
     pub fn len(&self) -> usize {
         self.teams.len()
     }
@@ -93,9 +88,6 @@ impl Teams {
         team_id: TeamId,
         participant: Participant,
     ) -> Result<(), SerenityError> {
-        if let Some(old_team) = self.participants.get(&participant.id) {
-            self.teams.remove(old_team);
-        }
         if let (Some(team), Some(capacity)) = (self.teams.get(&team_id), self.capacity) {
             if team.team.len() >= capacity as usize {
                 return Err(SerenityError::Other(
@@ -103,10 +95,6 @@ impl Teams {
                 ));
             }
         }
-        self.participants
-            .entry(participant.id)
-            .and_modify(|x| *x = team_id.clone())
-            .or_insert_with(|| team_id.clone());
         self.teams
             .entry(team_id)
             .and_modify(|x| x.team.push(participant));
@@ -127,10 +115,8 @@ impl Teams {
 impl Default for Teams {
     fn default() -> Self {
         let teams = HashMap::new();
-        let participants = HashMap::new();
         Teams {
             teams,
-            participants,
             capacity: None,
         }
     }

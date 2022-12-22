@@ -1,7 +1,15 @@
 {
   "1050942451575173170": {
     "teams": {
-      "teams": {},
+      "teams": {
+        "0": {
+          "name": "test",
+          "description": "",
+          "team": [],
+          "text_channel": "1055346589901783180",
+          "vocal_channel": "1055346590908424203"
+        }
+      },
       "participants": {},
       "capacity": null
     },
@@ -12,6 +20,21 @@
     "start_time": "2023-03-17T12:00:00Z",
     "location": "UQAC - Chicoutimi",
     "msg_id": "1054980528283062314",
+    "channel_id": "1050254533537845288"
+  },
+  "1050937384155480124": {
+    "teams": {
+      "teams": {},
+      "participants": {},
+      "capacity": null
+    },
+    "id": "1050937384155480124",
+    "name": "Findin da way",
+    "description": "Do you know da way?",
+    "image": "https://cdn.discordapp.com/guild-events/1050937384155480124/210b9e09eb6c75b8bfa79db349fe4cc2?size=512",
+    "start_time": "2022-12-29T22:30:00Z",
+    "location": "Uganda",
+    "msg_id": "1054980527221903421",
     "channel_id": "1050254533537845288"
   },
   "1050884052183437412": {
@@ -49,21 +72,6 @@
     "start_time": "2022-12-15T22:00:00Z",
     "location": "Somewhere existing or not",
     "msg_id": "1054980526341103687",
-    "channel_id": "1050254533537845288"
-  },
-  "1050937384155480124": {
-    "teams": {
-      "teams": {},
-      "participants": {},
-      "capacity": null
-    },
-    "id": "1050937384155480124",
-    "name": "Findin da way",
-    "description": "Do you know da way?",
-    "image": "https://cdn.discordapp.com/guild-events/1050937384155480124/210b9e09eb6c75b8bfa79db349fe4cc2?size=512",
-    "start_time": "2022-12-29T22:30:00Z",
-    "location": "Uganda",
-    "msg_id": "1054980527221903421",
     "channel_id": "1050254533537845288"
   }
 }

@@ -1,6 +1,6 @@
 use std::num::NonZeroU64;
 
-use crate::utils::{data::Data, events::Events, traits::SendOrEdit};
+use crate::utils::{events::Events, preference::Preference, traits::SendOrEdit};
 use serenity::{
     all::CommandOptionType, builder::*, collector::ComponentInteractionCollector,
     model::prelude::*, prelude::*,
@@ -30,7 +30,7 @@ async fn select_event(
 }
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
-    let Some(category) = Data::get_hackathon_category(ctx).await else {
+    let Some(category) = Preference::get_hackathon_category(ctx).await else {
         CreateInteractionResponseMessage::new()
         .content("Veuillez sélectionner la catégorie avec la commande `/setup`.")
         .build_and_send(ctx, interaction.id, &interaction.token)

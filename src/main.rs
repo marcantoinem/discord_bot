@@ -4,7 +4,7 @@ pub mod utils;
 
 use serenity::{async_trait, model::prelude::*, prelude::*};
 use std::{env, sync::Arc};
-use utils::{data::Data, events::*};
+use utils::{events::*, preference::Preference};
 
 struct Handler;
 
@@ -42,10 +42,10 @@ async fn main() {
     // Initialize the Arc RwLock which keep the data and refresh it.
     {
         let saved_events = Events::from_file();
-        let saved_data = Data::from_file();
+        let saved_data = Preference::from_file();
         let mut data = client.data.write().await;
         data.insert::<Events>(Arc::new(RwLock::new(saved_events)));
-        data.insert::<Data>(Arc::new(RwLock::new(saved_data)));
+        data.insert::<Preference>(Arc::new(RwLock::new(saved_data)));
     }
 
     // Finally, start a single shard, and start listening to events.

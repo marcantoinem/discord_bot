@@ -1,4 +1,4 @@
-use crate::utils::{data::Data, traits::SendOrEdit};
+use crate::utils::{preference::Preference, traits::SendOrEdit};
 use serenity::{
     builder::*, collector::ComponentInteractionCollector, model::prelude::*, prelude::*,
 };
@@ -25,7 +25,7 @@ async fn select_hackathon_channel(
     let ComponentInteractionDataKind::ChannelSelect { values } = &interaction.data.kind else {
             return Err(SerenityError::Other("Failed to collect interaction for hackathon channel."));
         };
-    Data::edit_hackathon_channel(ctx, values[0]).await;
+    Preference::edit_hackathon_channel(ctx, values[0]).await;
     Ok(interaction)
 }
 
@@ -51,7 +51,7 @@ async fn select_hackathon_category(
     let ComponentInteractionDataKind::ChannelSelect { values } = &interaction.data.kind else {
             return Err(SerenityError::Other("Failed to collect interaction for hackathon channel."));
         };
-    Data::edit_hackathon_category(ctx, values[0]).await;
+    Preference::edit_hackathon_category(ctx, values[0]).await;
     Ok(interaction)
 }
 

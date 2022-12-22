@@ -6,8 +6,8 @@ use std::{
 
 use super::{
     constants::EVENTS_PATH,
-    data::Data,
     event::{Event, EventBuilder},
+    preference::Preference,
 };
 use serde::{Deserialize, Serialize};
 use serenity::{builder::*, model::prelude::*, prelude::*};
@@ -25,6 +25,7 @@ impl Events {
     fn write_to_file(&self) {
         let events = self.clone();
         let data = serde_json::to_string_pretty(&events).expect("Serialization failed.");
+        // let event_path = EVENTS_PATH + events. + "_saved_event.json";
         fs::write(EVENTS_PATH, data).expect("Can't save data.");
     }
     async fn read_events(ctx: &Context) -> Events {
@@ -67,7 +68,7 @@ impl Events {
 /// Function which use Events
 impl Events {
     pub async fn add(ctx: &Context, scheduled_event: ScheduledEvent) {
-        let Some(hackathon_channel) = Data::get_hackathon_channel(ctx).await else {
+        let Some(hackathon_channel) = Preference::get_hackathon_channel(ctx).await else {
             return;
         };
         let event = EventBuilder::new(&scheduled_event)
@@ -102,7 +103,7 @@ impl Events {
         }
     }
     pub async fn update(ctx: &Context, scheduled_event: ScheduledEvent) {
-        let Some(hackathon_channel) = Data::get_hackathon_channel(ctx).await else {
+        let Some(hackathon_channel) = Preference::get_hackathon_channel(ctx).await else {
             return;
         };
         let events_lock = Events::get_lock(ctx).await;
@@ -123,7 +124,7 @@ impl Events {
         }
     }
     pub async fn refresh_event(ctx: &Context, event: &Event) {
-        let Some(hackathon_channel) = Data::get_hackathon_channel(ctx).await else {
+        let Some(hackathon_channel) = Preference::get_hackathon_channel(ctx).await else {
             return;
         };
         let events_lock = Events::get_lock(ctx).await;
