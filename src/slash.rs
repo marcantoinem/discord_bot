@@ -39,9 +39,10 @@ pub async fn interaction_create(ctx: &Context, interaction: Interaction) {
                 commands::new::run(ctx, &command).await.unwrap();
                 None
             }
-            "join" => match commands::join::run(ctx, &command).await {
-                _ => None,
-            },
+            "join" => {
+                commands::join::run(ctx, &command).await.unwrap();
+                None
+            }
             "setup" => {
                 commands::setup::run(ctx, &command).await.unwrap();
                 None

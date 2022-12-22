@@ -14,10 +14,10 @@ use serenity::{
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Team {
     pub name: String,
-    description: String,
+    pub description: String,
     team: Vec<Participant>,
-    text_channel: ChannelId,
-    vocal_channel: ChannelId,
+    pub text_channel: ChannelId,
+    pub vocal_channel: ChannelId,
 }
 
 impl Team {
@@ -85,6 +85,9 @@ impl Teams {
     pub fn len(&self) -> usize {
         self.teams.len()
     }
+    pub fn is_empty(&self) -> bool {
+        self.teams.is_empty()
+    }
     pub fn add_participant(
         &mut self,
         team_id: TeamId,
@@ -141,7 +144,7 @@ impl fmt::Display for Teams {
             team.team.iter().fold(Ok(()), |result, participant| {
                 result.and_then(|_| write!(f, "{} ", participant))
             })?;
-            writeln!(f, "")?;
+            writeln!(f)?;
         }
         Ok(())
     }

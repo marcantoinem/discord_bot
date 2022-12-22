@@ -42,10 +42,11 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
         .as_str()
         .ok_or(SerenityError::Other("Event selection failed."))?;
 
-    let description = match interaction.data.options.get(1) {
-        Some(option) => option.value.as_str().unwrap(),
-        None => "",
-    };
+    let description = interaction
+        .data
+        .options
+        .get(1)
+        .map_or("", |option| option.value.as_str().unwrap());
     let guild_id = interaction
         .guild_id
         .ok_or(SerenityError::Other("Guild creation failed."))?;
@@ -54,14 +55,30 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
     let mut event = Events::get(ctx, &event_id)
         .await
         .ok_or(SerenityError::Other("Guild creation failed."))?;
+    let bot_id = ctx.http.get_current_user().await?.id;
+    // Guild id is also the everyone role id.
+    let permissions = vec![
+        PermissionOverwrite {
+            allow: Permissions::empty(),
+            deny: Permissions::VIEW_CHANNEL,
+            kind: PermissionOverwriteType::Role(RoleId(NonZeroU64::from(guild_id))),
+        },
+        PermissionOverwrite {
+            allow: Permissions::VIEW_CHANNEL,
+            deny: Permissions::empty(),
+            kind: PermissionOverwriteType::Member(bot_id),
+        },
+    ];
     let text_channel = CreateChannel::new(name)
         .kind(ChannelType::Text)
         .category(category)
+        .permissions(permissions.clone())
         .execute(ctx, guild_id)
         .await?;
     let audio_channel = CreateChannel::new(name)
         .kind(ChannelType::Voice)
         .category(category)
+        .permissions(permissions)
         .execute(ctx, guild_id)
         .await?;
     event

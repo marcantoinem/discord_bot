@@ -161,10 +161,10 @@ impl Events {
         let events = Events::read_events(ctx).await;
         let options: Vec<CreateSelectMenuOption> = events
             .iter()
-            .filter(|(_, event)| event.teams.len() > 0)
+            .filter(|(_, event)| !event.teams.is_empty())
             .map(|(id, event)| CreateSelectMenuOption::new(event.name.clone(), id.to_string()))
             .collect();
-        if options.len() == 0 {
+        if options.is_empty() {
             return None;
         }
         let select_menu = CreateSelectMenuKind::String { options };

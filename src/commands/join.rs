@@ -14,13 +14,13 @@ use crate::utils::{
 async fn select_event(
     ctx: &Context,
     interaction: &CommandInteraction,
-) -> Result<(ComponentInteraction, ScheduledEventId), serenity::Error> {
+) -> Result<Option<(ComponentInteraction, ScheduledEventId)>, serenity::Error> {
     let Some(menu) = Events::menu_nonzero_team(ctx).await else {
         CreateInteractionResponseMessage::new()
             .content("Veuillez créer une équipe avant d'essayer de rejoindre une équipe.")
             .build_and_send(ctx, interaction.id, &interaction.token)
             .await?;
-        return Err(SerenityError::Other("No events with team."));
+        return Ok(None);
     };
     CreateInteractionResponseMessage::new()
         .select_menu(menu)
@@ -36,7 +36,7 @@ async fn select_event(
             return Err(SerenityError::Other("Event selection failed."));
     };
     let event_id = ScheduledEventId(values[0].parse::<NonZeroU64>().unwrap());
-    Ok((interaction, event_id))
+    Ok(Some((interaction, event_id)))
 }
 
 async fn select_team(
@@ -62,7 +62,9 @@ async fn select_team(
 }
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
-    let (interaction, event_id) = select_event(ctx, interaction).await?;
+    let Some((interaction, event_id)) = select_event(ctx, interaction).await? else {
+        return Ok(())
+    };
     let (interaction, team_id) = select_team(ctx, &interaction, &event_id).await?;
     let mut event = Events::get(ctx, &event_id)
         .await
@@ -72,10 +74,26 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
         .get_team(&team_id)
         .ok_or(SerenityError::Other("Event joining failed."))?;
     let participant = Participant::from_user(interaction.user);
+    let permissions = vec![PermissionOverwrite {
+        allow: Permissions::VIEW_CHANNEL,
+        deny: Permissions::empty(),
+        kind: PermissionOverwriteType::Member(participant.id),
+    }];
+    println!("Test1");
+    println!("{} {}", team.text_channel, team.vocal_channel);
+    let builder = EditChannel::new().permissions(permissions.clone());
+    team.text_channel.edit(ctx, builder.clone()).await?;
+    team.vocal_channel.edit(ctx, builder).await?;
+    // EditChannel::new()
+    //     .permissions(permissions)
+    //     .execute(ctx, team.vocal_channel, interaction.guild_id)
+    //     .await?;
+
     let msg = match event.teams.add_participant(team_id, participant) {
         Ok(_) => format! {"Vous avez été rajouté à l'équipe: {}", team.name},
         Err(error) => format! {"Vous n'avez pas été rajouté à l'équipe: {}", error},
     };
+    println!("Test2");
     Events::refresh_event(ctx, &event).await;
     CreateInteractionResponseMessage::new()
         .content(msg)

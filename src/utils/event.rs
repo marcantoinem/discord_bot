@@ -55,16 +55,13 @@ pub struct EventBuilder {
 
 impl EventBuilder {
     pub fn new(scheduled_event: &ScheduledEvent) -> EventBuilder {
-        let image = match &scheduled_event.image {
-            Some(image) => Some(
-                "https://cdn.discordapp.com/guild-events/".to_owned()
-                    + &scheduled_event.id.to_string()
-                    + "/"
-                    + image
-                    + "?size=512",
-            ),
-            None => None,
-        };
+        let image = scheduled_event.image.clone().map(|img| {
+            "https://cdn.discordapp.com/guild-events/".to_owned()
+                + &scheduled_event.id.to_string()
+                + "/"
+                + &img
+                + "?size=512"
+        });
         let location = scheduled_event
             .metadata
             .clone()
@@ -81,7 +78,7 @@ impl EventBuilder {
             image,
             location,
             start_time,
-            id: scheduled_event.id.clone(),
+            id: scheduled_event.id,
         }
     }
     pub fn teams(mut self, teams: Teams) -> EventBuilder {
