@@ -1,3 +1,5 @@
+use super::event::EventBuilder;
+use super::team::Teams;
 use serenity::builder::{CreateEmbed, CreateEmbedFooter, CreateMessage, EditMessage};
 use serenity::{model::prelude::*, prelude::*};
 
@@ -7,35 +9,24 @@ pub struct EventMessage {
     description: String,
     start_time: Timestamp,
     location: String,
+    teams: Teams,
     image: Option<String>,
 }
 
 impl EventMessage {
-    pub fn new() -> EventMessage {
+    pub fn new<E: Into<EventBuilder> + Clone>(event: &E) -> EventMessage {
+        let event: EventBuilder = event.clone().into();
         EventMessage {
-            title: String::from(""),
-            description: String::from(""),
-            start_time: Timestamp::now(),
-            location: String::from(""),
-            image: None,
+            title: event.name,
+            description: event.description,
+            start_time: event.start_time,
+            location: event.location,
+            teams: event.teams,
+            image: event.image,
         }
     }
-    pub fn event(mut self, scheduled_event: &ScheduledEvent) -> EventMessage {
-        self.title = scheduled_event.name.clone();
-        self.description = scheduled_event.description.clone().unwrap_or_default();
-        self.start_time = scheduled_event.start_time;
-        if let Some(metadata) = &scheduled_event.metadata {
-            self.location = metadata.location.clone();
-        }
-        if let Some(image_id) = &scheduled_event.image {
-            self.image = Some(
-                "https://cdn.discordapp.com/guild-events/".to_owned()
-                    + &scheduled_event.id.to_string()
-                    + "/"
-                    + image_id
-                    + "?size=512",
-            );
-        }
+    pub fn team(mut self, teams: Teams) -> EventMessage {
+        self.teams = teams;
         self
     }
     pub async fn build_and_send(
@@ -43,17 +34,21 @@ impl EventMessage {
         ctx: &Context,
         channel_id: ChannelId,
     ) -> Result<Message, SerenityError> {
-        let embed = CreateEmbed::new()
+        let embed_event = CreateEmbed::new()
             .title(self.title.clone())
             .description(self.description.clone())
             .timestamp(self.start_time)
             .footer(CreateEmbedFooter::new(self.location.clone()));
+        let embed_team = CreateEmbed::new()
+            .title("Équipes pour ".to_string() + &self.title.clone())
+            .description(self.teams.to_string())
+            .color(Color::GOLD);
         if let Some(image) = self.image.clone() {
-            let embed = embed.image(image);
-            let message = CreateMessage::new().add_embed(embed);
+            let embed_event = embed_event.image(image);
+            let message = CreateMessage::new().add_embeds(vec![embed_event, embed_team]);
             channel_id.send_message(&ctx.http, message).await
         } else {
-            let message = CreateMessage::new().add_embed(embed);
+            let message = CreateMessage::new().add_embeds(vec![embed_event, embed_team]);
             channel_id.send_message(&ctx.http, message).await
         }
     }
@@ -63,22 +58,23 @@ impl EventMessage {
         channel_id: ChannelId,
         message_id: MessageId,
     ) -> Result<Message, SerenityError> {
-        let embed = CreateEmbed::new()
+        let embed_event = CreateEmbed::new()
             .title(self.title.clone())
             .description(self.description.clone())
             .timestamp(self.start_time)
             .footer(CreateEmbedFooter::new(self.location.clone()));
+
+        let embed_team = CreateEmbed::new()
+            .title("Équipes pour ".to_string() + &self.title.clone())
+            .description(self.teams.to_string())
+            .color(Color::GOLD);
         if let Some(image) = self.image.clone().clone() {
-            let embed = embed.image(image);
-            let message = EditMessage::new().add_embed(embed);
-            channel_id
-                .edit_message(&ctx.http, message_id, message)
-                .await
+            let embed_event = embed_event.image(image);
+            let message = EditMessage::new().add_embeds(vec![embed_event, embed_team]);
+            channel_id.edit_message(ctx, message_id, message).await
         } else {
-            let message = EditMessage::new().add_embed(embed);
-            channel_id
-                .edit_message(&ctx.http, message_id, message)
-                .await
+            let message = EditMessage::new().add_embeds(vec![embed_event, embed_team]);
+            channel_id.edit_message(ctx, message_id, message).await
         }
     }
 }

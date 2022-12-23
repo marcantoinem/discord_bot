@@ -12,5 +12,5 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> String {
 }
 
 pub fn register() -> CreateCommand {
-    CreateCommand::new("refresh").description("Pull all event and refresh.")
+    CreateCommand::new("refresh").description("Pull all events and refresh.")
 }

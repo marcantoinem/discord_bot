@@ -1,25 +1,39 @@
+//! Event represent an hackathon and the associated teams.
+
 use super::{msg::EventMessage, team::Teams};
 use serde::{Deserialize, Serialize};
 use serenity::{model::prelude::*, prelude::*};
 
-// Trust me this is safe, unwraping an non zero u64 in NonZeroU64.
-
-pub const CHANNEL_ID: ChannelId = ChannelId::new(1050254533537845288);
-
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Event {
     pub teams: Teams,
-    pub scheduled_event: ScheduledEvent,
-    pub msg: Message,
+    pub id: ScheduledEventId,
+    pub name: String,
+    pub description: String,
+    pub image: Option<String>,
+    pub start_time: Timestamp,
+    pub location: String,
+    pub msg_id: MessageId,
+    pub channel_id: ChannelId,
 }
 
 impl Event {
-    pub async fn update(&mut self, ctx: &Context, scheduled_event: ScheduledEvent) {
-        let msg = EventMessage::new().event(&scheduled_event);
-        match &msg.build_and_edit(ctx, CHANNEL_ID, self.msg.id).await {
-            Ok(msg) => self.msg = msg.clone(),
-            Err(_) => match &msg.build_and_send(ctx, CHANNEL_ID).await {
-                Ok(message) => self.msg = message.clone(),
+    pub async fn update(&self, ctx: &Context, hackathon_channel: ChannelId) {
+        let mut event = self.clone();
+        let msg = EventMessage::new(self);
+        match &msg
+            .build_and_edit(ctx, hackathon_channel, self.msg_id)
+            .await
+        {
+            Ok(msg) => {
+                event.msg_id = msg.id;
+                event.channel_id = msg.channel_id
+            }
+            Err(_) => match &msg.build_and_send(ctx, hackathon_channel).await {
+                Ok(msg) => {
+                    event.msg_id = msg.id;
+                    event.channel_id = msg.channel_id
+                }
                 Err(why) => {
                     println!("Error creating message: {:?}", why);
                 }
@@ -28,30 +42,81 @@ impl Event {
     }
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct EventBuilder {
-    teams: Teams,
-    scheduled_event: ScheduledEvent,
+    pub teams: Teams,
+    pub id: ScheduledEventId,
+    pub name: String,
+    pub description: String,
+    pub image: Option<String>,
+    pub start_time: Timestamp,
+    pub location: String,
 }
 
 impl EventBuilder {
     pub fn new(scheduled_event: &ScheduledEvent) -> EventBuilder {
+        let image = scheduled_event.image.clone().map(|img| {
+            "https://cdn.discordapp.com/guild-events/".to_owned()
+                + &scheduled_event.id.to_string()
+                + "/"
+                + &img
+                + "?size=512"
+        });
+        let location = scheduled_event
+            .metadata
+            .clone()
+            .unwrap_or(ScheduledEventMetadata {
+                location: "".to_string(),
+            })
+            .location;
+        let description = scheduled_event.description.clone().unwrap_or_default();
+        let start_time = scheduled_event.start_time;
         EventBuilder {
             teams: Teams::default(),
-            scheduled_event: scheduled_event.clone(),
+            name: scheduled_event.name.clone(),
+            description,
+            image,
+            location,
+            start_time,
+            id: scheduled_event.id,
         }
     }
+    pub fn teams(mut self, teams: Teams) -> EventBuilder {
+        self.teams = teams;
+        self
+    }
     pub async fn build_and_send(self, ctx: &Context, channel_id: ChannelId) -> Option<Event> {
-        let msg = EventMessage::new().event(&self.scheduled_event);
+        let msg = EventMessage::new(&self);
         match &msg.build_and_send(ctx, channel_id).await {
             Ok(message) => Some(Event {
                 teams: self.teams,
-                scheduled_event: self.scheduled_event,
-                msg: message.clone(),
+                id: self.id,
+                name: self.name,
+                description: self.description,
+                image: self.image,
+                start_time: self.start_time,
+                location: self.location,
+                msg_id: message.id,
+                channel_id: message.channel_id,
             }),
             Err(why) => {
                 println!("Error creating message: {:?}", why);
                 None
             }
+        }
+    }
+}
+
+impl From<Event> for EventBuilder {
+    fn from(event: Event) -> EventBuilder {
+        EventBuilder {
+            teams: event.teams,
+            id: event.id,
+            name: event.name,
+            description: event.description,
+            image: event.image,
+            start_time: event.start_time,
+            location: event.location,
         }
     }
 }

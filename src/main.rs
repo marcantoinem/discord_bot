@@ -3,8 +3,8 @@ pub mod slash;
 pub mod utils;
 
 use serenity::{async_trait, model::prelude::*, prelude::*};
-use std::{env, fs::File, sync::Arc};
-use utils::events::*;
+use std::{env, sync::Arc};
+use utils::{events::Events, servers::*};
 
 struct Handler;
 
@@ -32,7 +32,7 @@ async fn main() {
     // Configure the client with your Discord bot token in the environment.
     let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
 
-    let intents = GatewayIntents::non_privileged() | GatewayIntents::GUILD_SCHEDULED_EVENTS;
+    let intents = GatewayIntents::non_privileged() | GatewayIntents::GUILDS;
     // Build our client.
     let mut client = Client::builder(token, intents)
         .event_handler(Handler)
@@ -41,15 +41,11 @@ async fn main() {
 
     // Initialize the Arc RwLock which keep the data and refresh it.
     {
+        let saved_events = ServerEvents::from_files();
+        let saved_data = ServerPreference::from_files();
         let mut data = client.data.write().await;
-        let saved_data = match File::open(PATH) {
-            Err(_) => Events::default(),
-            Ok(file) => {
-                let reader = std::io::BufReader::new(file);
-                serde_json::from_reader(reader).expect("File is probably corrupted.")
-            }
-        };
-        data.insert::<EventsContainer>(Arc::new(RwLock::new(saved_data)));
+        data.insert::<ServerEvents>(Arc::new(RwLock::new(saved_events)));
+        data.insert::<ServerPreference>(Arc::new(RwLock::new(saved_data)));
     }
 
     // Finally, start a single shard, and start listening to events.
