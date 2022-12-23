@@ -2,12 +2,16 @@
 
 use crate::commands::{self};
 use crate::utils::events::Events;
+use crate::utils::servers::{ServerEvents, ServerPreference};
 use serenity::{builder::*, model::prelude::*, prelude::*};
 
 pub async fn ready(ctx: &Context, ready: Ready) {
+    ServerEvents::init(ctx, &ready).await;
+    ServerPreference::init(ctx, &ready).await;
     for guild_id in ready.guilds.iter().map(|guild| guild.id) {
         Events::refresh(ctx, &ready).await;
-        println!("{} is connected in {:?}!", ready.user.name, ready.guilds);
+
+        println!("{} is connected in {}!", ready.user.name, guild_id);
         let commands = vec![
             commands::refresh::register(),
             commands::join::register(),

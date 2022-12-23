@@ -10,7 +10,7 @@ async fn select_event(
     ctx: &Context,
     interaction: &CommandInteraction,
 ) -> Result<(ComponentInteraction, ScheduledEventId), serenity::Error> {
-    let menu = Events::menu(ctx).await;
+    let menu = Events::menu(ctx, interaction.guild_id.unwrap()).await;
 
     CreateInteractionResponseMessage::new()
         .select_menu(menu)
@@ -30,7 +30,8 @@ async fn select_event(
 }
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
-    let Some(category) = Preference::get_hackathon_category(ctx).await else {
+    let guild_id = interaction.guild_id.unwrap();
+    let Some(category) = Preference::get_hackathon_category(ctx, guild_id).await else {
         CreateInteractionResponseMessage::new()
         .content("Veuillez sélectionner la catégorie avec la commande `/setup`.")
         .build_and_send(ctx, interaction.id, &interaction.token)
@@ -52,7 +53,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
         .ok_or(SerenityError::Other("Guild creation failed."))?;
 
     let (interaction, event_id) = select_event(ctx, interaction).await?;
-    let mut event = Events::get(ctx, &event_id)
+    let mut event = Events::get(ctx, guild_id, &event_id)
         .await
         .ok_or(SerenityError::Other("Guild creation failed."))?;
     let bot_id = ctx.http.get_current_user().await?.id;
@@ -84,7 +85,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
     event
         .teams
         .add_team(name, description, text_channel.id, audio_channel.id);
-    Events::refresh_event(ctx, &event).await;
+    Events::refresh_event(ctx, guild_id, &event).await;
     let msg = format!("Vous avez créé l'équipe {}", name);
     CreateInteractionResponseMessage::new()
         .content(msg)

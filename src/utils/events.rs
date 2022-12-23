@@ -2,7 +2,6 @@ use std::{
     collections::{hash_map::Iter, HashMap},
     fs,
     path::Path,
-    sync::Arc,
 };
 
 use super::{
@@ -28,15 +27,17 @@ impl Events {
             map: HashMap::new(),
         }
     }
-    fn write_to_file(&self) {
+    pub fn write_to_file(&self) {
         let events = self.clone();
         let data = serde_json::to_string_pretty(&events).expect("Serialization failed.");
-        let event_path = "cache/".to_owned() + &events.guild_id.to_string() + "saved_event.json";
+        let event_path = "cache/".to_owned() + &events.guild_id.to_string() + "_saved_events.json";
         fs::write(event_path, data).expect("Can't save data.");
     }
-    async fn read_events(ctx: &Context) -> Events {
+    async fn read_events(ctx: &Context, guild_id: GuildId) -> Events {
         let events_lock = ServerEvents::get_lock(ctx).await;
         let events = events_lock.read().await;
+        println!("{:?}", events);
+        let events = events.0.get(&guild_id).unwrap();
         events.clone()
     }
     pub fn from_file<T: AsRef<Path>>(path: T) -> Option<Events> {
@@ -51,10 +52,10 @@ impl Events {
             }
         }
     }
-    pub async fn get(ctx: &Context, id: &ScheduledEventId) -> Option<Event> {
+    pub async fn get(ctx: &Context, guild_id: GuildId, id: &ScheduledEventId) -> Option<Event> {
         let events_lock = ServerEvents::get_lock(ctx).await;
         let events = events_lock.read().await;
-        events.map.get(id).cloned()
+        events.0.get(&guild_id)?.map.get(id).cloned()
     }
     pub fn get_mut(&mut self, id: &ScheduledEventId) -> Option<&mut Event> {
         self.map.get_mut(id)
@@ -67,7 +68,8 @@ impl Events {
 /// Function which use Events
 impl Events {
     pub async fn add(ctx: &Context, scheduled_event: ScheduledEvent) {
-        let Some(hackathon_channel) = Preference::get_hackathon_channel(ctx).await else {
+        let guild_id = scheduled_event.guild_id;
+        let Some(hackathon_channel) = Preference::get_hackathon_channel(ctx, guild_id).await else {
             return;
         };
         let event = EventBuilder::new(&scheduled_event)
@@ -79,14 +81,24 @@ impl Events {
 
         {
             let mut events = events_lock.write().await;
-            events.map.insert(scheduled_event.id, event);
-            events.write_to_file();
+            events.0.entry(guild_id).and_modify(|events| {
+                events.map.insert(scheduled_event.id, event);
+                events.write_to_file();
+            });
         }
     }
     pub async fn delete(ctx: &Context, scheduled_event: ScheduledEvent) {
+        let guild_id = scheduled_event.guild_id;
         let events_lock = ServerEvents::get_lock(ctx).await;
         {
             let mut events = events_lock.write().await;
+            let mut new_events = Events::new(guild_id);
+            let events = match events.0.get_mut(&guild_id) {
+                Some(events) => events,
+                None => &mut new_events,
+            };
+            events.map.remove(&scheduled_event.id);
+            events.write_to_file();
             let Some(event) = events.map.get(&scheduled_event.id) else {
                 return;
             };
@@ -97,17 +109,24 @@ impl Events {
             {
                 println!("An error occurred while running the client: {:?}", why);
             }
-            events.map.remove(&scheduled_event.id);
-            events.write_to_file();
         }
     }
     pub async fn update(ctx: &Context, scheduled_event: ScheduledEvent) {
-        let Some(hackathon_channel) = Preference::get_hackathon_channel(ctx).await else {
+        let guild_id = scheduled_event.guild_id;
+        let Some(hackathon_channel) = Preference::get_hackathon_channel(ctx, guild_id).await else {
             return;
         };
         let events_lock = ServerEvents::get_lock(ctx).await;
         {
-            let mut events = events_lock.write().await;
+            let mut server_events = events_lock.write().await;
+            let mut new_events = Events::new(guild_id);
+            let events = match server_events.0.get_mut(&guild_id) {
+                Some(events) => events,
+                None => {
+                    server_events.0.insert(guild_id, new_events.clone());
+                    &mut new_events
+                }
+            };
             if let Some(event) = events.map.get(&scheduled_event.id) {
                 let event = event.clone();
                 event.update(ctx, hackathon_channel).await;
@@ -122,13 +141,18 @@ impl Events {
             events.write_to_file();
         }
     }
-    pub async fn refresh_event(ctx: &Context, event: &Event) {
-        let Some(hackathon_channel) = Preference::get_hackathon_channel(ctx).await else {
+    pub async fn refresh_event(ctx: &Context, guild_id: GuildId, event: &Event) {
+        let Some(hackathon_channel) = Preference::get_hackathon_channel(ctx, guild_id).await else {
             return;
         };
         let events_lock = ServerEvents::get_lock(ctx).await;
         {
             let mut events = events_lock.write().await;
+            let mut new_events = Events::new(guild_id);
+            let events = match events.0.get_mut(&guild_id) {
+                Some(events) => events,
+                None => &mut new_events,
+            };
             events
                 .map
                 .entry(event.id)
@@ -151,8 +175,8 @@ impl Events {
             }
         }
     }
-    pub async fn menu(ctx: &Context) -> CreateSelectMenu {
-        let events = Events::read_events(ctx).await;
+    pub async fn menu(ctx: &Context, guild_id: GuildId) -> CreateSelectMenu {
+        let events = Events::read_events(ctx, guild_id).await;
         let options = events
             .iter()
             .map(|(id, event)| CreateSelectMenuOption::new(event.name.clone(), id.to_string()))
@@ -160,8 +184,8 @@ impl Events {
         let select_menu = CreateSelectMenuKind::String { options };
         CreateSelectMenu::new("events", select_menu)
     }
-    pub async fn menu_nonzero_team(ctx: &Context) -> Option<CreateSelectMenu> {
-        let events = Events::read_events(ctx).await;
+    pub async fn menu_nonzero_team(ctx: &Context, guild_id: GuildId) -> Option<CreateSelectMenu> {
+        let events = Events::read_events(ctx, guild_id).await;
         let options: Vec<CreateSelectMenuOption> = events
             .iter()
             .filter(|(_, event)| !event.teams.is_empty())

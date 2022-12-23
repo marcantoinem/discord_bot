@@ -15,7 +15,8 @@ async fn select_event(
     ctx: &Context,
     interaction: &CommandInteraction,
 ) -> Result<Option<(ComponentInteraction, ScheduledEventId)>, serenity::Error> {
-    let Some(menu) = Events::menu_nonzero_team(ctx).await else {
+    let guild_id = interaction.guild_id.unwrap();
+    let Some(menu) = Events::menu_nonzero_team(ctx, guild_id).await else {
         CreateInteractionResponseMessage::new()
             .content("Veuillez créer une équipe avant d'essayer de rejoindre une équipe.")
             .build_and_send(ctx, interaction.id, &interaction.token)
@@ -44,7 +45,8 @@ async fn select_team(
     interaction: &ComponentInteraction,
     event_id: &ScheduledEventId,
 ) -> Result<(ComponentInteraction, TeamId), serenity::Error> {
-    let menu = Teams::menu(ctx, *event_id).await;
+    let guild_id = interaction.guild_id.unwrap();
+    let menu = Teams::menu(ctx, guild_id, *event_id).await;
     CreateInteractionResponseMessage::new()
         .content("Sélectionnez l'équipe que vous voulez rejoindre.")
         .components(vec![CreateActionRow::SelectMenu(menu)])
@@ -62,11 +64,12 @@ async fn select_team(
 }
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+    let guild_id = interaction.guild_id.unwrap();
     let Some((interaction, event_id)) = select_event(ctx, interaction).await? else {
         return Ok(())
     };
     let (interaction, team_id) = select_team(ctx, &interaction, &event_id).await?;
-    let mut event = Events::get(ctx, &event_id)
+    let mut event = Events::get(ctx, guild_id, &event_id)
         .await
         .ok_or(SerenityError::Other("Event joining failed."))?;
     let team = event
@@ -94,7 +97,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
         Err(error) => format! {"Vous n'avez pas été rajouté à l'équipe: {}", error},
     };
     println!("Test2");
-    Events::refresh_event(ctx, &event).await;
+    Events::refresh_event(ctx, guild_id, &event).await;
     CreateInteractionResponseMessage::new()
         .content(msg)
         .components(vec![])

@@ -3,7 +3,7 @@ pub mod slash;
 pub mod utils;
 
 use serenity::{async_trait, model::prelude::*, prelude::*};
-use std::{env, sync::Arc, sync::RwLock};
+use std::{env, sync::Arc};
 use utils::{events::Events, servers::*};
 
 struct Handler;

@@ -6,7 +6,7 @@ use std::{
 use super::{events::Events, participant::Participant};
 use serde::{Deserialize, Serialize};
 use serenity::{
-    all::{ChannelId, ScheduledEventId},
+    all::{ChannelId, GuildId, ScheduledEventId},
     builder::*,
     prelude::*,
 };
@@ -100,8 +100,12 @@ impl Teams {
             .and_modify(|x| x.team.push(participant));
         Ok(())
     }
-    pub async fn menu(ctx: &Context, event_id: ScheduledEventId) -> CreateSelectMenu {
-        let event = Events::get(ctx, &event_id).await.unwrap();
+    pub async fn menu(
+        ctx: &Context,
+        guild_id: GuildId,
+        event_id: ScheduledEventId,
+    ) -> CreateSelectMenu {
+        let event = Events::get(ctx, guild_id, &event_id).await.unwrap();
         let options: Vec<CreateSelectMenuOption> = event
             .teams
             .iter()
