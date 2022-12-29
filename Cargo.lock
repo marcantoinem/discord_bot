@@ -111,7 +111,7 @@ dependencies = [
 [[package]]
 name = "command_attr"
 version = "0.4.1"
-source = "git+https://github.com/marcantoinem/serenity/?branch=Fix-create-channel-builder-type#27ed4974ade0ad615787ec26c1d2a40d3462d566"
+source = "git+https://github.com/serenity-rs/serenity?branch=next#ba3be69166f54c5986e4cc9438bc5bb4606fa4c2"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -903,7 +903,7 @@ dependencies = [
 [[package]]
 name = "serenity"
 version = "0.11.5"
-source = "git+https://github.com/marcantoinem/serenity/?branch=Fix-create-channel-builder-type#27ed4974ade0ad615787ec26c1d2a40d3462d566"
+source = "git+https://github.com/serenity-rs/serenity?branch=next#ba3be69166f54c5986e4cc9438bc5bb4606fa4c2"
 dependencies = [
  "async-trait",
  "base64",
