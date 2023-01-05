@@ -15,6 +15,7 @@ pub async fn ready(ctx: &Context, ready: Ready) {
         let commands = vec![
             commands::refresh::register(),
             commands::join::register(),
+            commands::quit::register(),
             commands::setup::register(),
             commands::new::register(),
         ];
@@ -43,6 +44,10 @@ pub async fn interaction_create(ctx: &Context, interaction: Interaction) {
             }
             "setup" => {
                 commands::setup::run(ctx, &command).await.unwrap();
+                None
+            }
+            "quit" => {
+                commands::quit::run(ctx, &command).await.unwrap();
                 None
             }
             _ => Some("not implemented :(".to_string()),

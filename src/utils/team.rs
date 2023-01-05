@@ -6,7 +6,7 @@ use std::{
 use super::{events::Events, participant::Participant};
 use serde::{Deserialize, Serialize};
 use serenity::{
-    all::{ChannelId, GuildId, ScheduledEventId},
+    all::{ChannelId, GuildId, ScheduledEventId, UserId},
     builder::*,
     prelude::*,
 };
@@ -35,6 +35,11 @@ impl Team {
             text_channel,
             vocal_channel,
         }
+    }
+    pub fn contains(&self, user_id: UserId) -> bool {
+        self.team
+            .iter()
+            .any(|participant| participant.id == user_id)
     }
 }
 
@@ -100,15 +105,22 @@ impl Teams {
             .and_modify(|x| x.team.push(participant));
         Ok(())
     }
+    pub fn remove_participant(&mut self, team_id: TeamId, user_id: UserId) {
+        self.teams.entry(team_id).and_modify(|x| {
+            x.team.retain(|participant| participant.id != user_id);
+        });
+    }
     pub async fn menu(
         ctx: &Context,
         guild_id: GuildId,
         event_id: ScheduledEventId,
+        user_id: UserId,
     ) -> CreateSelectMenu {
         let event = Events::get(ctx, guild_id, &event_id).await.unwrap();
         let options: Vec<CreateSelectMenuOption> = event
             .teams
             .iter()
+            .filter(|(_, team)| !team.contains(user_id))
             .map(|(id, team)| CreateSelectMenuOption::new(team.name.clone(), id.to_string()))
             .collect();
         let select_menu = CreateSelectMenuKind::String { options };

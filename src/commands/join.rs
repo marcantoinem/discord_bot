@@ -16,9 +16,9 @@ async fn select_event(
     interaction: &CommandInteraction,
 ) -> Result<Option<(ComponentInteraction, ScheduledEventId)>, serenity::Error> {
     let guild_id = interaction.guild_id.unwrap();
-    let Some(menu) = Events::menu_nonzero_team(ctx, guild_id).await else {
+    let Some(menu) = Events::menu_nonzero_team(ctx, guild_id, interaction.user.id).await else {
         CreateInteractionResponseMessage::new()
-            .content("Veuillez créer une équipe avant d'essayer de rejoindre une équipe.")
+            .content("Veuillez créer une équipe valide avant d'essayer de la rejoindre.")
             .build_and_send(ctx, interaction.id, &interaction.token)
             .await?;
         return Ok(None);
@@ -46,7 +46,7 @@ async fn select_team(
     event_id: &ScheduledEventId,
 ) -> Result<(ComponentInteraction, TeamId), serenity::Error> {
     let guild_id = interaction.guild_id.unwrap();
-    let menu = Teams::menu(ctx, guild_id, *event_id).await;
+    let menu = Teams::menu(ctx, guild_id, *event_id, interaction.user.id).await;
     CreateInteractionResponseMessage::new()
         .content("Sélectionnez l'équipe que vous voulez rejoindre.")
         .components(vec![CreateActionRow::SelectMenu(menu)])
@@ -82,21 +82,13 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
         deny: Permissions::empty(),
         kind: PermissionOverwriteType::Member(participant.id),
     }];
-    println!("Test1");
-    println!("{} {}", team.text_channel, team.vocal_channel);
     let builder = EditChannel::new().permissions(permissions.clone());
     team.text_channel.edit(ctx, builder.clone()).await?;
     team.vocal_channel.edit(ctx, builder).await?;
-    // EditChannel::new()
-    //     .permissions(permissions)
-    //     .execute(ctx, team.vocal_channel, interaction.guild_id)
-    //     .await?;
-
     let msg = match event.teams.add_participant(team_id, participant) {
         Ok(_) => format! {"Vous avez été rajouté à l'équipe: {}", team.name},
         Err(error) => format! {"Vous n'avez pas été rajouté à l'équipe: {}", error},
     };
-    println!("Test2");
     Events::refresh_event(ctx, guild_id, &event).await;
     CreateInteractionResponseMessage::new()
         .content(msg)
