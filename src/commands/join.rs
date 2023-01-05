@@ -63,7 +63,6 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
         return Ok(())
     };
     let (interaction, team_id) = select_team(ctx, &interaction, &event_id).await?;
-<<<<<<< HEAD
 
     let msg = match interface
         .join_equip(event_id, team_id, interaction.user)
@@ -73,29 +72,6 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
         Err(error) => format! {"Vous n'avez pas été rajouté à l'équipe: {}", error},
     };
 
-=======
-    let mut event = Events::get(ctx, guild_id, &event_id)
-        .await
-        .ok_or(SerenityError::Other("Event joining failed."))?;
-    let team = event
-        .teams
-        .get_team(&team_id)
-        .ok_or(SerenityError::Other("Event joining failed."))?;
-    let participant = Participant::from_user(interaction.user);
-    let permissions = vec![PermissionOverwrite {
-        allow: Permissions::VIEW_CHANNEL,
-        deny: Permissions::empty(),
-        kind: PermissionOverwriteType::Member(participant.id),
-    }];
-    let builder = EditChannel::new().permissions(permissions.clone());
-    team.text_channel.edit(ctx, builder.clone()).await?;
-    team.vocal_channel.edit(ctx, builder).await?;
-    let msg = match event.teams.add_participant(team_id, participant) {
-        Ok(_) => format! {"Vous avez été rajouté à l'équipe: {}", team.name},
-        Err(error) => format! {"Vous n'avez pas été rajouté à l'équipe: {}", error},
-    };
-    Events::refresh_event(ctx, guild_id, &event).await;
->>>>>>> 434aaf36be4e969025f0582a08c49757e48d7f07
     CreateInteractionResponseMessage::new()
         .content(msg)
         .components(vec![])

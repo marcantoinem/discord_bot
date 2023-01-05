@@ -4,7 +4,7 @@ use serenity::{
     builder::*, collector::ComponentInteractionCollector, model::prelude::*, prelude::*,
 };
 
-use crate::utils::{events::Events, team::TeamId, traits::SendOrEdit};
+use crate::utils::prelude::*;
 
 async fn select_team(
     ctx: &Context,
