@@ -36,7 +36,6 @@ impl Events {
     async fn read_events(ctx: &Context, guild_id: GuildId) -> Events {
         let events_lock = ServerEvents::get_lock(ctx).await;
         let events = events_lock.read().await;
-        println!("{:?}", events);
         let events = events.0.get(&guild_id).unwrap();
         events.clone()
     }
@@ -184,12 +183,48 @@ impl Events {
         let select_menu = CreateSelectMenuKind::String { options };
         CreateSelectMenu::new("events", select_menu)
     }
-    pub async fn menu_nonzero_team(ctx: &Context, guild_id: GuildId) -> Option<CreateSelectMenu> {
+    pub async fn menu_nonzero_team(
+        ctx: &Context,
+        guild_id: GuildId,
+        user_id: UserId,
+    ) -> Option<CreateSelectMenu> {
         let events = Events::read_events(ctx, guild_id).await;
         let options: Vec<CreateSelectMenuOption> = events
             .iter()
-            .filter(|(_, event)| !event.teams.is_empty())
+            .filter(|(_, event)| {
+                !(event.teams.is_empty()
+                    || event.teams.iter().all(|(_, team)| team.contains(user_id)))
+            })
             .map(|(id, event)| CreateSelectMenuOption::new(event.name.clone(), id.to_string()))
+            .collect();
+        if options.is_empty() {
+            return None;
+        }
+        let select_menu = CreateSelectMenuKind::String { options };
+        Some(CreateSelectMenu::new("events", select_menu))
+    }
+    pub async fn menu_team_with_user(
+        ctx: &Context,
+        guild_id: GuildId,
+        user_id: UserId,
+    ) -> Option<CreateSelectMenu> {
+        let events = Events::read_events(ctx, guild_id).await;
+        let options: Vec<CreateSelectMenuOption> = events
+            .iter()
+            .map(|(event_id, event)| {
+                event
+                    .teams
+                    .iter()
+                    .filter(|(_, team)| team.contains(user_id))
+                    .map(move |(team_id, team)| (event_id, team_id, team))
+            })
+            .flatten()
+            .map(|(event_id, team_id, team)| {
+                CreateSelectMenuOption::new(
+                    team.name.clone(),
+                    event_id.to_string() + "/" + &team_id.to_string(),
+                )
+            })
             .collect();
         if options.is_empty() {
             return None;
