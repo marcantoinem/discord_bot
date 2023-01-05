@@ -1,8 +1,8 @@
 //! Slash commands are registered and handled here.
 
 use crate::commands::{self};
-use crate::utils::events::Events;
-use crate::utils::servers::{ServerEvents, ServerPreference};
+use crate::utils::backend::events::Events;
+use crate::utils::backend::servers::{ServerEvents, ServerPreference};
 use serenity::{builder::*, model::prelude::*, prelude::*};
 
 pub async fn ready(ctx: &Context, ready: Ready) {

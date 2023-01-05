@@ -1,4 +1,4 @@
-use crate::utils::{preference::Preference, traits::SendOrEdit};
+use crate::utils::prelude::*;
 use serenity::{
     builder::*, collector::ComponentInteractionCollector, model::prelude::*, prelude::*,
 };

@@ -1,10 +1,9 @@
-use std::num::NonZeroU64;
-
-use crate::utils::{events::Events, preference::Preference, traits::SendOrEdit};
+use crate::utils::prelude::*;
 use serenity::{
     all::CommandOptionType, builder::*, collector::ComponentInteractionCollector,
     model::prelude::*, prelude::*,
 };
+use std::num::NonZeroU64;
 
 async fn select_event(
     ctx: &Context,
@@ -30,63 +29,24 @@ async fn select_event(
 }
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
-    let guild_id = interaction.guild_id.unwrap();
-    let Some(category) = Preference::get_hackathon_category(ctx, guild_id).await else {
-        CreateInteractionResponseMessage::new()
-        .content("Veuillez sélectionner la catégorie avec la commande `/setup`.")
-        .build_and_send(ctx, interaction.id, &interaction.token)
-        .await?;
-        return Ok(())
-    };
+    let interface = Interface::new(ctx, interaction.guild_id.unwrap());
     let name = interaction.data.options[0]
         .value
         .as_str()
-        .ok_or(SerenityError::Other("Event selection failed."))?;
+        .ok_or(SerenityError::Other("Team creation failed."))?;
 
     let description = interaction
         .data
         .options
         .get(1)
         .map_or("", |option| option.value.as_str().unwrap());
-    let guild_id = interaction
-        .guild_id
-        .ok_or(SerenityError::Other("Guild creation failed."))?;
 
     let (interaction, event_id) = select_event(ctx, interaction).await?;
-    let mut event = Events::get(ctx, guild_id, &event_id)
-        .await
-        .ok_or(SerenityError::Other("Guild creation failed."))?;
-    let bot_id = ctx.http.get_current_user().await?.id;
-    // Guild id is also the everyone role id.
-    let permissions = vec![
-        PermissionOverwrite {
-            allow: Permissions::empty(),
-            deny: Permissions::VIEW_CHANNEL,
-            kind: PermissionOverwriteType::Role(RoleId(NonZeroU64::from(guild_id))),
-        },
-        PermissionOverwrite {
-            allow: Permissions::VIEW_CHANNEL,
-            deny: Permissions::empty(),
-            kind: PermissionOverwriteType::Member(bot_id),
-        },
-    ];
-    let text_channel = CreateChannel::new(name)
-        .kind(ChannelType::Text)
-        .category(category)
-        .permissions(permissions.clone())
-        .execute(ctx, guild_id)
-        .await?;
-    let audio_channel = CreateChannel::new(name)
-        .kind(ChannelType::Voice)
-        .category(category)
-        .permissions(permissions)
-        .execute(ctx, guild_id)
-        .await?;
-    event
-        .teams
-        .add_team(name, description, text_channel.id, audio_channel.id);
-    Events::refresh_event(ctx, guild_id, &event).await;
-    let msg = format!("Vous avez créé l'équipe {}", name);
+
+    let msg = match interface.create_equip(event_id, name, description).await {
+        Ok(_) => format!("Vous avez créé l'équipe {}", name),
+        Err(err) => format!("{}", err),
+    };
     CreateInteractionResponseMessage::new()
         .content(msg)
         .components(vec![])

@@ -4,7 +4,7 @@ pub mod utils;
 
 use serenity::{async_trait, model::prelude::*, prelude::*};
 use std::{env, sync::Arc};
-use utils::{events::Events, servers::*};
+use utils::backend::{events::Events, servers::*};
 
 struct Handler;
 

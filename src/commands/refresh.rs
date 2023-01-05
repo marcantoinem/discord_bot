@@ -1,4 +1,4 @@
-use crate::utils::events::Events;
+use crate::utils::prelude::*;
 use serenity::{builder::*, model::prelude::*, prelude::*};
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> String {
