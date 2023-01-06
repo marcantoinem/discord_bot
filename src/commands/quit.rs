@@ -38,29 +38,17 @@ async fn select_team(
 }
 
 pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
-    let guild_id = interaction.guild_id.unwrap();
+    let participant = Interface::new(ctx, interaction.guild_id.unwrap());
     let Some((interaction, event_id, team_id)) = select_team(ctx, interaction).await? else {
         return Ok(())
     };
-    let mut event = Events::get(ctx, guild_id, &event_id)
-        .await
-        .ok_or(SerenityError::Other("Team quitting failed."))?;
-    let team = event
-        .teams
-        .get_team(&team_id)
-        .ok_or(SerenityError::Other("Team quitting failed."))?;
-    let permissions = vec![PermissionOverwrite {
-        allow: Permissions::empty(),
-        deny: Permissions::VIEW_CHANNEL,
-        kind: PermissionOverwriteType::Member(interaction.user.id),
-    }];
-    let builder = EditChannel::new().permissions(permissions.clone());
-    event.teams.remove_participant(team_id, interaction.user.id);
-    team.text_channel.edit(ctx, builder.clone()).await?;
-    team.vocal_channel.edit(ctx, builder).await?;
-    Events::refresh_event(ctx, guild_id, &event).await;
+
+    let team = participant
+        .quit_equip(event_id, team_id, interaction.user)
+        .await?;
+
     CreateInteractionResponseMessage::new()
-        .content(format!("Vous avez été quitté l'équipe: {}", team.name))
+        .content(format!("Vous avez quitté l'équipe: {}", team.name))
         .components(vec![])
         .build_and_edit(ctx, interaction.id, &interaction.token)
         .await?;

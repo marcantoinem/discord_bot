@@ -3,6 +3,8 @@ use serenity::builder::*;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 use std::num::NonZeroU64;
+
+use super::backend::team;
 pub struct Interface<'a> {
     guild_id: GuildId,
     ctx: &'a Context,
@@ -41,12 +43,41 @@ impl Interface<'_> {
         Events::refresh_event(self.ctx, self.guild_id, &event).await;
         Ok(())
     }
+    pub async fn quit_equip<U>(
+        &self,
+        event_id: ScheduledEventId,
+        team_id: TeamId,
+        user: U,
+    ) -> Result<team::Team, serenity::Error>
+    where
+        U: Into<Participant>,
+    {
+        let mut event = Events::get(self.ctx, self.guild_id, &event_id)
+            .await
+            .ok_or(SerenityError::Other("Team quitting failed."))?;
+        let team = event
+            .teams
+            .get_team(&team_id)
+            .ok_or(SerenityError::Other("Team quitting failed."))?;
+        let user: Participant = user.into();
+        let permissions = vec![PermissionOverwrite {
+            allow: Permissions::empty(),
+            deny: Permissions::VIEW_CHANNEL,
+            kind: PermissionOverwriteType::Member(user.id),
+        }];
+        let builder = EditChannel::new().permissions(permissions.clone());
+        event.teams.remove_participant(team_id, user.id);
+        team.text_channel.edit(self.ctx, builder.clone()).await?;
+        team.vocal_channel.edit(self.ctx, builder).await?;
+        Events::refresh_event(self.ctx, self.guild_id, &event).await;
+        Ok(team)
+    }
     pub async fn create_equip<T>(
         &self,
         event_id: ScheduledEventId,
         name: T,
         description: T,
-    ) -> Result<(), serenity::Error>
+    ) -> Result<team::Team, serenity::Error>
     where
         T: Into<String> + Clone,
     {
@@ -84,10 +115,9 @@ impl Interface<'_> {
             .permissions(permissions)
             .execute(self.ctx, self.guild_id)
             .await?;
-        event
-            .teams
-            .add_team(name, description, text_channel.id, audio_channel.id);
+        let team = team::Team::new(name, description, vec![], text_channel.id, audio_channel.id);
+        event.teams.add_team(team.clone());
         Events::refresh_event(self.ctx, self.guild_id, &event).await;
-        Ok(())
+        Ok(team)
     }
 }

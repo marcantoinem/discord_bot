@@ -65,14 +65,7 @@ pub struct Teams {
 }
 
 impl Teams {
-    pub fn add_team<Text: Into<String>>(
-        &mut self,
-        name: Text,
-        description: Text,
-        text_channel: ChannelId,
-        vocal_channel: ChannelId,
-    ) {
-        let team = Team::new(name, description, vec![], text_channel, vocal_channel);
+    pub fn add_team(&mut self, team: Team) {
         let team_id = TeamId(self.teams.len() as u64);
         self.teams.insert(team_id, team);
     }
