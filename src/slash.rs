@@ -18,6 +18,7 @@ pub async fn ready(ctx: &Context, ready: Ready) {
             commands::quit::register(),
             commands::setup::register(),
             commands::new::register(),
+            commands::delete::register(),
         ];
         let commands = guild_id
             .set_application_commands(&ctx.http, commands)
@@ -36,6 +37,10 @@ pub async fn interaction_create(ctx: &Context, interaction: Interaction) {
             "refresh" => Some(commands::refresh::run(ctx, &command).await),
             "new" => {
                 commands::new::run(ctx, &command).await.unwrap();
+                None
+            }
+            "delete" => {
+                commands::delete::run(ctx, &command).await.unwrap();
                 None
             }
             "join" => {

@@ -1,22 +1,15 @@
-use std::num::NonZeroU64;
-
 use crate::utils::prelude::*;
 use serenity::{
     builder::*, collector::ComponentInteractionCollector, model::prelude::*, prelude::*,
 };
+use std::num::NonZeroU64;
 
 async fn select_event(
     ctx: &Context,
     interaction: &CommandInteraction,
 ) -> Result<Option<(ComponentInteraction, ScheduledEventId)>, serenity::Error> {
     let guild_id = interaction.guild_id.unwrap();
-    let Some(menu) = Events::menu_nonzero_team(ctx, guild_id, interaction.user.id).await else {
-        CreateInteractionResponseMessage::new()
-            .content("Veuillez créer une équipe valide avant d'essayer de la rejoindre.")
-            .build_and_send(ctx, interaction.id, &interaction.token)
-            .await?;
-        return Ok(None);
-    };
+    let menu = Events::menu(ctx, guild_id).await;
     CreateInteractionResponseMessage::new()
         .select_menu(menu)
         .content("Sélectionnez l'événement que vous voulez rejoindre.")
@@ -40,7 +33,7 @@ async fn select_team(
     event_id: &ScheduledEventId,
 ) -> Result<(ComponentInteraction, TeamId), serenity::Error> {
     let guild_id = interaction.guild_id.unwrap();
-    let menu = Teams::menu_without_user(ctx, guild_id, *event_id, interaction.user.id).await;
+    let menu = Teams::menu(ctx, guild_id, *event_id).await;
     CreateInteractionResponseMessage::new()
         .content("Sélectionnez l'équipe que vous voulez rejoindre.")
         .components(vec![CreateActionRow::SelectMenu(menu)])
@@ -64,14 +57,10 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
     };
     let (interaction, team_id) = select_team(ctx, &interaction, &event_id).await?;
 
-    let msg = match interface
-        .join_equip(event_id, team_id, interaction.user)
-        .await
-    {
-        Ok(_) => format! {"Vous avez été rajouté à l'équipe."},
-        Err(error) => format! {"Vous n'avez pas été rajouté à l'équipe: {}", error},
+    let msg = match interface.delete_equip(event_id, team_id).await {
+        Ok(team) => format!("Vous avez détruit l'équipe {}", team.name),
+        Err(err) => format!("{}", err),
     };
-
     CreateInteractionResponseMessage::new()
         .content(msg)
         .components(vec![])
@@ -81,5 +70,5 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
 }
 
 pub fn register() -> CreateCommand {
-    CreateCommand::new("join").description("Join a team.")
+    CreateCommand::new("delete").description("Delete a team.")
 }

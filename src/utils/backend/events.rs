@@ -150,7 +150,10 @@ impl Events {
             let mut new_events = Events::new(guild_id);
             let events = match events.0.get_mut(&guild_id) {
                 Some(events) => events,
-                None => &mut new_events,
+                None => {
+                    println!("I'm executed event thought I shouldn't.");
+                    &mut new_events
+                }
             };
             events
                 .map
@@ -181,7 +184,7 @@ impl Events {
             .map(|(id, event)| CreateSelectMenuOption::new(event.name.clone(), id.to_string()))
             .collect();
         let select_menu = CreateSelectMenuKind::String { options };
-        CreateSelectMenu::new("events", select_menu)
+        CreateSelectMenu::new("teams", select_menu)
     }
     pub async fn menu_nonzero_team(
         ctx: &Context,
@@ -201,7 +204,7 @@ impl Events {
             return None;
         }
         let select_menu = CreateSelectMenuKind::String { options };
-        Some(CreateSelectMenu::new("events", select_menu))
+        Some(CreateSelectMenu::new("teams", select_menu))
     }
     pub async fn menu_team_with_user(
         ctx: &Context,

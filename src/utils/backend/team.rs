@@ -81,6 +81,9 @@ impl Teams {
     pub fn is_empty(&self) -> bool {
         self.teams.is_empty()
     }
+    pub fn delete(&mut self, team_id: &TeamId) -> Option<Team> {
+        self.teams.remove(team_id)
+    }
     pub fn add_participant(
         &mut self,
         team_id: TeamId,
@@ -103,7 +106,7 @@ impl Teams {
             x.team.retain(|participant| participant.id != user_id);
         });
     }
-    pub async fn menu(
+    pub async fn menu_without_user(
         ctx: &Context,
         guild_id: GuildId,
         event_id: ScheduledEventId,
@@ -114,6 +117,20 @@ impl Teams {
             .teams
             .iter()
             .filter(|(_, team)| !team.contains(user_id))
+            .map(|(id, team)| CreateSelectMenuOption::new(team.name.clone(), id.to_string()))
+            .collect();
+        let select_menu = CreateSelectMenuKind::String { options };
+        CreateSelectMenu::new("team", select_menu)
+    }
+    pub async fn menu(
+        ctx: &Context,
+        guild_id: GuildId,
+        event_id: ScheduledEventId,
+    ) -> CreateSelectMenu {
+        let event = Events::get(ctx, guild_id, &event_id).await.unwrap();
+        let options: Vec<CreateSelectMenuOption> = event
+            .teams
+            .iter()
             .map(|(id, team)| CreateSelectMenuOption::new(team.name.clone(), id.to_string()))
             .collect();
         let select_menu = CreateSelectMenuKind::String { options };

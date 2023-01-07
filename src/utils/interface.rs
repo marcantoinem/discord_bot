@@ -120,4 +120,22 @@ impl Interface<'_> {
         Events::refresh_event(self.ctx, self.guild_id, &event).await;
         Ok(team)
     }
+    pub async fn delete_equip(
+        &self,
+        event_id: ScheduledEventId,
+        team_id: TeamId,
+    ) -> Result<team::Team, SerenityError> {
+        let mut event = Events::get(self.ctx, self.guild_id, &event_id)
+            .await
+            .ok_or(SerenityError::Other("Team creation failed."))?;
+        let team = event
+            .teams
+            .delete(&team_id)
+            .ok_or(SerenityError::Other("Wtf there is not team with this id."))?;
+        // This is only to use the err variant even if we don't care if the channel was already deleted.
+        let _ = self.ctx.http.delete_channel(team.text_channel, None).await;
+        let _ = self.ctx.http.delete_channel(team.vocal_channel, None).await;
+        Events::refresh_event(self.ctx, self.guild_id, &event).await;
+        Ok(team)
+    }
 }
